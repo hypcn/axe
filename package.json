@@ -1,0 +1,23 @@
+{
+  "name": "@hypericon/axe",
+  "version": "0.1.0",
+  "description": "A simple tool for logging",
+  "author": "Ed Johnson, Hypericon Ltd.",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsc -w --preserveWatchOutput",
+    "prebuild": "rimraf dist",
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "chalk": "^5.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.2.3",
+    "rimraf": "^5.0.1",
+    "typescript": "^5.0.4"
+  }
+}
