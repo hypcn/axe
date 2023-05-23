@@ -1,26 +1,24 @@
-import { inspect } from "util";
 import { LogLevel, LogLevelNumbers, LogLevels, LogMessage, LogSink } from "./interfaces";
-import { ConsoleSink } from "./sinks";
-import { Logger } from "./logger";
 import { SinkFilter } from "./interfaces/sink-filter.interface";
+import { Logger } from "./logger";
+import { ConsoleSink } from "./sinks";
 
 /** The name of the default console sink */
 export const CONSOLE_SINK = "Console";
 
 const isProd = process.env.NODE_ENV === "production";
 
-export class AxeCore {
+export class AxeManager {
 
-  // commonSettings = {  };
   commonContext: string = "";
-  commonLogLevel: LogLevel = "log";
+  commonLogLevel: LogLevel = LogLevels.log;
 
   commonDeviceId: string | undefined;
   commonDeviceName: string | undefined;
   commonProcessId: string = process.pid.toString();
 
   /**
-   * Weak references to Logger instances, to make them available for centralised sink and
+   * List of Logger instances, to make them available for centralised sink and
    * log level configuration via API
    */
   private loggerInstances: Logger[] = [];
@@ -43,7 +41,7 @@ export class AxeCore {
   // ===== Logger Instances
 
   /**
-   * Create a new Logger associated with this core instance
+   * Create a new Logger associated with this manager
    * @param context 
    * @returns 
    */
@@ -54,18 +52,22 @@ export class AxeCore {
   }
 
   /**
-   * Adds the given logger to this core instance, removing it from its previous core instance
+   * Adds the given logger to this manager, removing it from its previous manager
    * @param logger 
    */
   addLogger(logger: Logger) {
-    logger._core?.removeLogger(logger);
-    logger._core = this;
+    logger._manager?.removeLogger(logger);
+    logger._manager = this;
     this.loggerInstances.push(logger);
   }
 
+  /**
+   * Remove the given logger from this manager, and remove the logger's manager reference
+   * @param logger 
+   */
   removeLogger(logger: Logger) {
     this.loggerInstances = this.loggerInstances.filter(l => l !== logger);
-    logger._core = undefined;
+    logger._manager = undefined;
   }
 
   // ===== Log Sinks
@@ -108,38 +110,24 @@ export class AxeCore {
     return this.commonSinkFilter.set(sinkName, logLevel);
   }
 
-  // ===== Perform Logging
-
-  buildMessageString(...msgs: any[]): string {
-
-    // console.log("build message string from:", msgs);
-    if (msgs.length === 0) return "";
-
-    return msgs.map(msg => {
-      if (msg === null) return "null";
-      if (msg === undefined) return "undefined";
-      if (typeof msg === "object") return inspect(msg);
-      return msg.toString();
-    }).join(" ");
-
-  }
+  // ===== Handle Log Messages
 
   buildLogMessage(partalMsg: Partial<LogMessage>): LogMessage {
 
     return {
       context: partalMsg.context ?? this.commonContext,
-      level: partalMsg.level ?? "log",
+      level: partalMsg.level ?? this.commonLogLevel,
       message: partalMsg.message ?? "",
       timestamp: partalMsg.timestamp ?? new Date(),
 
-      deviceId: partalMsg.deviceId,
-      deviceName: partalMsg.deviceName,
+      deviceId: partalMsg.deviceId ?? this.commonDeviceId,
+      deviceName: partalMsg.deviceName ?? this.commonDeviceName,
       processId: partalMsg.processId ?? this.commonProcessId,
     };
 
   }
 
-  sinkLogMessage(message: LogMessage, sinkFilter?: SinkFilter) {
+  handleLogMessage(message: LogMessage, sinkFilter?: SinkFilter) {
 
     for (const sinkName of this.sinks.keys()) {
 
@@ -151,8 +139,8 @@ export class AxeCore {
 
   }
 
-  buildLogMessageAndSink(partialMsg: Partial<LogMessage>, sinkFilter?: SinkFilter) {
-    return this.sinkLogMessage(this.buildLogMessage(partialMsg), sinkFilter);
+  buildAndHandleLogMessage(partialMsg: Partial<LogMessage>, sinkFilter?: SinkFilter) {
+    return this.handleLogMessage(this.buildLogMessage(partialMsg), sinkFilter);
   }
 
   /**
@@ -171,6 +159,6 @@ export class AxeCore {
 }
 
 /**
- * The default instance of the logger core
+ * The default instance of the manager
  */
-export const Axe = new AxeCore({ withDefaultConsoleLogger: true });
+export const defaultAxeManager = new AxeManager({ withDefaultConsoleLogger: true });

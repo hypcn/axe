@@ -1,14 +1,15 @@
 import { LogLevel, SimpleLogger, SinkFilter } from "./interfaces";
-import { Axe, AxeCore } from "./axe-core";
+import { defaultAxeManager, AxeManager } from "./axe-manager";
+import { inspect } from "util";
 
 export class Logger implements SimpleLogger {
 
   /**
-   * The core instance this logger is associated with.
-   * May be undefined if the logger has been destroyed for some reason.
+   * The manager this logger is associated with.
+   * May be undefined if the logger has been destroyed or removed.
    * @internal
    */
-  _core: AxeCore | undefined = Axe;
+  _manager: AxeManager | undefined = defaultAxeManager;
 
   /**
    * This logger's context.
@@ -27,53 +28,67 @@ export class Logger implements SimpleLogger {
   }
 
   error(...msgs: any[]) {
-    if (this._core === undefined) return;
+    if (this._manager === undefined) return;
 
-    return this._core.buildLogMessageAndSink({
+    return this._manager.buildAndHandleLogMessage({
       level: "error",
       context: this.context,
-      message: this._core.buildMessageString(...msgs),
+      message: this.buildMessageString(...msgs),
     }, this.sinkFilter);
   }
 
   warn(...msgs: any[]) {
-    if (this._core === undefined) return;
+    if (this._manager === undefined) return;
 
-    return this._core.buildLogMessageAndSink({
+    return this._manager.buildAndHandleLogMessage({
       level: "warn",
       context: this.context,
-      message: this._core.buildMessageString(...msgs),
+      message: this.buildMessageString(...msgs),
     }, this.sinkFilter);
   }
 
   log(...msgs: any[]) {
-    if (this._core === undefined) return;
+    if (this._manager === undefined) return;
 
-    return this._core.buildLogMessageAndSink({
+    return this._manager.buildAndHandleLogMessage({
       level: "log",
       context: this.context,
-      message: this._core.buildMessageString(...msgs),
+      message: this.buildMessageString(...msgs),
     }, this.sinkFilter);
   }
 
   debug(...msgs: any[]) {
-    if (this._core === undefined) return;
+    if (this._manager === undefined) return;
 
-    return this._core.buildLogMessageAndSink({
+    return this._manager.buildAndHandleLogMessage({
       level: "debug",
       context: this.context,
-      message: this._core.buildMessageString(...msgs),
+      message: this.buildMessageString(...msgs),
     }, this.sinkFilter);
   }
 
   verbose(...msgs: any[]) {
-    if (this._core === undefined) return;
+    if (this._manager === undefined) return;
 
-    return this._core.buildLogMessageAndSink({
+    return this._manager.buildAndHandleLogMessage({
       level: "verbose",
       context: this.context,
-      message: this._core.buildMessageString(...msgs),
+      message: this.buildMessageString(...msgs),
     }, this.sinkFilter);
+  }
+
+  private buildMessageString(...msgs: any[]): string {
+
+    // console.log("build message string from:", msgs);
+    if (msgs.length === 0) return "";
+
+    return msgs.map(msg => {
+      if (msg === null) return "null";
+      if (msg === undefined) return "undefined";
+      if (typeof msg === "object") return inspect(msg);
+      return msg.toString();
+    }).join(" ");
+
   }
 
 }

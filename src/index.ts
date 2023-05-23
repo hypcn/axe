@@ -1,5 +1,5 @@
 
-export * from "./axe-core";
+export * from "./axe-manager";
 export * from "./logger";
 
 export * from "./interfaces";
