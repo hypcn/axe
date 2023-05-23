@@ -301,7 +301,7 @@ sink.readLogFile(filename: string): Promise<{ filename: string, contents: string
 
 ## HypertableSink
 
-Log messages to the [Hypertable](https://hypertable.co.uk). For each new message, a new Record is created within a target Collection, with the data from the logged message written to the new Record.
+Log messages to [Hypertable](https://hypertable.co.uk). For each new message, a new Record is created within a target Collection, with the data from the logged message written to the new Record.
 
 Example:
 
