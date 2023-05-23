@@ -1,28 +1,51 @@
-import { LogLevel, LogLevels } from "../interfaces/log-level.interface";
+import chalk from "chalk";
+import { LogLevelNameLeft, LogLevels } from "../interfaces";
 import { LogMessage } from "../interfaces/log-message.interface";
 import { LogTransport } from "../interfaces/log-transport.interface";
 
-// colour?
+const LOG_LEVEL_COLOUR_FNS = {
+  [LogLevels.none]: chalk.bgRedBright,
+  [LogLevels.error]: chalk.red,
+  [LogLevels.warn]: chalk.yellow,
+  [LogLevels.log]: chalk.blue,
+  [LogLevels.debug]: chalk.magenta,
+  [LogLevels.verbose]: chalk.gray,
+} as const;
+
+const CONTEXT_COLOUR_FN = chalk.yellow;
 
 export class ConsoleTransport implements LogTransport {
 
-  logLevel: LogLevel;
-
-  useColour?: boolean;
+  noColour?: boolean;
+  noTimestamp?: boolean;
+  noLevel?: boolean;
+  noContext?: boolean;
 
   constructor(settings?: {
-    logLevel?: LogLevel,
-    useColour?: boolean,
+    noColour?: boolean,
+    noTimestamp?: boolean,
+    noLevel?: boolean,
+    noContext?: boolean,
   }) {
-    this.logLevel = settings?.logLevel ?? LogLevels.log;
-
-    this.useColour = settings?.useColour;
+    this.noColour = settings?.noColour;
+    this.noTimestamp = settings?.noTimestamp;
+    this.noContext = settings?.noContext;
+    this.noLevel = settings?.noLevel;
   }
   
   handleMessage(logMessage: LogMessage) {
 
-    throw new Error("Method not implemented.");
+    console.log([
+      `[${logMessage.timestamp.toISOString()}]`,
+      LOG_LEVEL_COLOUR_FNS[logMessage.level](LogLevelNameLeft[logMessage.level]),
+      CONTEXT_COLOUR_FN(`[${logMessage.context}]`),
+      LOG_LEVEL_COLOUR_FNS[logMessage.level](logMessage.message),
+    ].join("  "));
 
+  }
+
+  destroy() {
+    // noop
   }
 
 }

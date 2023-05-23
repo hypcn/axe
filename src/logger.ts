@@ -1,61 +1,79 @@
-import { LogTransport, SimpleLogger } from "./interfaces";
-import { LoggerCore } from "./logger-core";
+import { LogLevel, SimpleLogger, TransportFilter } from "./interfaces";
+import { Axe, LoggerCore } from "./logger-core";
 
 export class Logger implements SimpleLogger {
 
   /**
+   * The core instance this logger is associated with.
+   * May be undefined if the logger has been destroyed for some reason.
+   * @internal
+   */
+  _core: LoggerCore | undefined = Axe;
+
+  /**
    * This logger's context.
-   * If undefined, the common context is used from LoggerCore.
+   * If undefined, the common context is used.
    */
   context: string | undefined;
 
   /**
-   * The log transports to use for this logger.
-   * If undefined, the common transports are used from LoggerCore.
+   * Map of transport names to minimum LogLevels required to use the transport.
+   * If a filter level is not defined for a transport, the common transport filter level is used.
    */
-  transports?: LogTransport[] | undefined;
+  transportFilter = new TransportFilter();
 
   constructor(context?: string) {
     this.context = context;
-
-    LoggerCore.instances.add(this);
   }
 
   error(...msgs: any[]) {
-    return LoggerCore.buildLogMessageAndTransport({
+    if (this._core === undefined) return;
+
+    return this._core.buildLogMessageAndTransport({
       level: "error",
-      message: LoggerCore.buildMessageString(...msgs),
-    }, this.transports);
+      context: this.context,
+      message: this._core.buildMessageString(...msgs),
+    }, this.transportFilter);
   }
 
   warn(...msgs: any[]) {
-    return LoggerCore.buildLogMessageAndTransport({
+    if (this._core === undefined) return;
+
+    return this._core.buildLogMessageAndTransport({
       level: "warn",
-      message: LoggerCore.buildMessageString(...msgs),
-    }, this.transports);
+      context: this.context,
+      message: this._core.buildMessageString(...msgs),
+    }, this.transportFilter);
   }
 
   log(...msgs: any[]) {
-    return LoggerCore.buildLogMessageAndTransport({
+    if (this._core === undefined) return;
+
+    return this._core.buildLogMessageAndTransport({
       level: "log",
-      message: LoggerCore.buildMessageString(...msgs),
-    }, this.transports);
+      context: this.context,
+      message: this._core.buildMessageString(...msgs),
+    }, this.transportFilter);
   }
 
   debug(...msgs: any[]) {
-    return LoggerCore.buildLogMessageAndTransport({
+    if (this._core === undefined) return;
+
+    return this._core.buildLogMessageAndTransport({
       level: "debug",
-      message: LoggerCore.buildMessageString(...msgs),
-    }, this.transports);
+      context: this.context,
+      message: this._core.buildMessageString(...msgs),
+    }, this.transportFilter);
   }
 
   verbose(...msgs: any[]) {
-    return LoggerCore.buildLogMessageAndTransport({
-      level: "verbose",
-      message: LoggerCore.buildMessageString(...msgs),
-    }, this.transports);
-  }
+    if (this._core === undefined) return;
 
-  
+    return this._core.buildLogMessageAndTransport({
+      level: "verbose",
+      context: this.context,
+      message: this._core.buildMessageString(...msgs),
+    }, this.transportFilter);
+  }
 
 }
