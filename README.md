@@ -18,7 +18,7 @@ Includes fine-grained filtering of logs by log level
 - Override settings for individual logger instances
 - Create separate manager instances with their own sinks for even more options
 
-## Installation
+# Installation
 
 Install with NPM:
 
@@ -26,7 +26,9 @@ Install with NPM:
 npm install @hypericon/axe
 ```
 
-## Example
+Includes type definitions.
+
+# Example
 
 Example Typescript usage:
 
@@ -76,5 +78,262 @@ logger2.log("This allows them to configure their sinks and common filters separa
 // `AxeManager` with the default console sink.
 ```
 
+# Usage
+
+## LogLevel
+
+The type `LogLevel` and const `LogLevels` define the log levels used in Axe.
+
+```typescript
+import { LogLevel, LogLevels } from "@hypericon/axe";
+
+// LogLevel is defined like this:
+type LogLevel = "error" | "warn" | "log" | "debug" | "verbose" | "none";
+
+// LogLevels is defined like this:
+const LogLevels = {
+  error: "error",
+  warn: "warn",
+  log: "log",
+  debug: "debug",
+  verbose: "verbose",
+  none: "none",
+} as const;
+```
+
 ## Logger
 
+`Logger` is the main point of contact for the library.
+
+```typescript
+import { Logger, LogLevel } from "@hypericon/axe";
+
+// Create a new Logger with the given context
+const logger = new Logger(context?: string);
+
+// Log anything with one of the 5 log levels
+logger.error(...msgs: any[]);
+logger.warn(...msgs: any[]);
+logger.log(...msgs: any[]);
+logger.debug(...msgs: any[]);
+logger.verbose(...msgs: any[]);
+
+// Logger instances can be configured to override the logFilter settings of `LogSink`s in their manager
+
+// Read all of the logger's filter settings (may be empty)
+logger.sinkFilter.read(): { [sinkName: string]: LogLevel };
+// Get the logger's filter set on the named sink (may be undefined)
+logger.sinkFilter.get(sinkName: string): LogLevel | undefined;
+// Set a log filter on the named sink
+logger.sinkFilter.set(sinkName: string, logLevel: LogLevel): void;
+// Remove the log filter set on the named sink
+logger.sinkFilter.remove(sinkName: string): void;
+// Remove all log filters set on the logger
+logger.sinkFilter.clear(): void;
+```
+
+## AxeManager
+
+`AxeManager` stores instances of `Logger` and `LogSink`, and handles formatting and filtering logged messages.
+
+Every `Logger` is associated with one `AxeManager`.
+
+A default instance named `axeManager` is exported from the library. `Logger`s created using the `new Logger(...)` constructor are associated with this instance.
+
+```typescript
+import { axeManager, AxeManager, LogSink } from "@hypericon/axe";
+
+// `axeManager` is the default `AxeManager` instance.
+const logger1 = new Logger("1"); // manager -> `axeManager`
+
+// Create a separate manager instance
+const anotherManager = new AxeManager();
+const logger2 = anotherManager.createLogger("2"); // manager -> `anotherManager`
+
+// `LogSink`s are managed in `AxeManager` instances separately
+axeManager.addSink(...);
+anotherManager.addSink(...);
+
+// Find, add, and remove `LogSink`s and filters
+axeManager.findSinkByName(name: string): LogSink | undefined;
+axeManager.findSink<T extends LogSink>(sinkClass: Class<T>): T | undefined;
+axeManager.addSink(sink: LogSink): void;
+axeManager.removeSinkByName(name: string): void;
+axeManager.removeSink(sink: LogSink): void;
+axeManager.removeAllSinks(): void;
+
+axeManager.readSinkFilters(): { [name: string]: LogLevel };
+axeManager.setSinkFilter(sinkName: string, logLevel: LogLevel): void;
+```
+
+## LogSink
+
+`LogSink` is an interface which all sinks implement.
+
+To make a custom sink, implement the interface then add the object to an AxeManager.
+
+```typescript
+import { LogSink, axeManager, Logger, LogLevels } from "@hypericon/axe";
+
+// LogSink is defined like this:
+interface LogSink {
+  /**
+   * The unique name of the sink.
+   * The name only needs to be unique with a single manager.
+   */
+  name: string,
+  /**
+   * The default minimum log level that a received message must have for it to be handled.
+   * If the log level of a received message is lower than this, the message is ignored.
+   * 
+   * This can be overridden by individual logger instances.
+   */
+  logFilter: LogLevel,
+  /**
+   * Handle a logged message. The message does not need to be filtered again.
+   * @param logMessage 
+   */
+  handleMessage(logMessage: LogMessage): any,
+  /**
+   * Gracefully destroy the sink. It cannot be used again.
+   */
+  destroy(): any,
+}
+
+// Create a custom sink, and register it with the default manager after removing the default sink:
+
+class MySink implements LogSink {
+  name: "MySink",
+  logLevel: LogLevels.log,
+
+  constructor(settings: { /* ... */ }) {
+    // ...
+  }
+
+  handleMessage(logMessage: LogMessage) {
+    // ...
+  }
+  destroy() {
+    // ...
+  }
+}
+
+axeManager.removeAllSinks();
+axeManager.addSink(new MySink({ /* ... */ }));
+
+const logger = new Logger("Context");
+logger.log("A message");
+```
+
+## ConsoleSink
+
+Log messages to the console.
+
+Example:
+
+```typescript
+import { Logger, axeManager, LogLevels, ConsoleSink } from "@hypericon/axe";
+
+axeManager.removeAllSinks();
+axeManager.addSink(new ConsoleSink({
+  name: "ConsoleSink",
+  logLevel: LogLevels.log,
+}));
+
+const logger = new Logger("Example");
+logger.log("A message logged to the console");
+```
+
+## FileSink
+
+Log messages to a file.
+
+Example:
+
+```typescript
+import { Logger, axeManager, LogLevels, FileSink } from "@hypericon/axe";
+
+axeManager.removeAllSinks();
+axeManager.addSink(new FileSink({
+  name: "FileSink",
+  logLevel: LogLevels.log,
+}));
+
+const logger = new Logger("Example");
+logger.log("A message logged to a file");
+```
+
+## HypertableSink
+
+Log messages to the [Hypertable](https://hypertable.co.uk).
+
+Example:
+
+```typescript
+import { Logger, axeManager, LogLevels, HypertableSink } from "@hypericon/axe";
+
+axeManager.removeAllSinks();
+axeManager.addSink(new HypertableSink({
+  name: "HypertableSink",
+  logLevel: LogLevels.log,
+}));
+
+const logger = new Logger("Example");
+logger.log("A message logged to a Hypertable record");
+```
+
+## ObservableSink
+
+Log messages to an [Rxjs]() observable, so they can be easily consumed elsewhere in the application.
+
+Example:
+
+```typescript
+import { Logger, axeManager, LogLevels, ObservableSink } from "@hypericon/axe";
+
+axeManager.removeAllSinks();
+const sink = new ObservableSink({
+  name: "ObservableSink",
+  logLevel: LogLevels.log,
+});
+axeManager.addSink(sink);
+
+sink.logMessage$.subscribe(msg => {
+  // ...
+});
+
+const logger = new Logger("Example");
+logger.log("A message logged to Observable");
+```
+
+## WebhookSink
+
+Log messages to a webhook.
+
+Example:
+
+```typescript
+import { Logger, axeManager, LogLevels, WebhookSink } from "@hypericon/axe";
+
+axeManager.removeAllSinks();
+axeManager.addSink(new WebhookSink({
+  name: "WebhookSink",
+  logLevel: LogLevels.warn,
+
+  /** The URL to which to send the request */
+  url: "https://some.url/api/123-456-789",
+  /** Specify a different HTTP method */
+  method?: "POST",
+  /** Any additional headers to include with the request */
+  headers?: {
+    "Authorization": "...",
+  },
+  /** Optionally override the function building the request body */
+  buildBody?: (logMessage: LogMessage) => {
+    return { /* ... */ }
+  },
+}));
+
+const logger = new Logger("Example");
+logger.warn("A warning logged to the webhook");
+```
