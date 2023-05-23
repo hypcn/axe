@@ -1,4 +1,4 @@
-import { LogMessage, LogSink } from "../interfaces";
+import { LogLevel, LogLevels, LogMessage, LogSink } from "../interfaces";
 
 // default filename template?
 // path?
@@ -7,10 +7,16 @@ import { LogMessage, LogSink } from "../interfaces";
 
 export class FileSink implements LogSink {
 
+  name: string = this.constructor.name;
+  logLevel: LogLevel = LogLevels.log;
 
-  constructor(settings?: {
-    
+  constructor(settings: {
+    name?: string,
+    logLevel?: LogLevel,
+
   }) {
+    if (settings.name) this.name = settings.name;
+    if (settings.logLevel) this.logLevel = settings.logLevel;
 
 
   }

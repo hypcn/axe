@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { LogLevelNameLeft, LogLevels } from "../interfaces";
+import { LogLevel, LogLevelNameLeft, LogLevels } from "../interfaces";
 import { LogMessage } from "../interfaces/log-message.interface";
 import { LogSink } from "../interfaces/log-sink.interface";
 
@@ -16,21 +16,30 @@ const CONTEXT_COLOUR_FN = chalk.yellow;
 
 export class ConsoleSink implements LogSink {
 
+  name: string = this.constructor.name;
+  logLevel: LogLevel = LogLevels.debug;
+
   noColour?: boolean;
   noTimestamp?: boolean;
   noLevel?: boolean;
   noContext?: boolean;
 
-  constructor(settings?: {
+  constructor(settings: {
+    name?: string,
+    logLevel?: LogLevel,
+
     noColour?: boolean,
     noTimestamp?: boolean,
     noLevel?: boolean,
     noContext?: boolean,
   }) {
-    this.noColour = settings?.noColour;
-    this.noTimestamp = settings?.noTimestamp;
-    this.noContext = settings?.noContext;
-    this.noLevel = settings?.noLevel;
+    if (settings.name) this.name = settings.name;
+    if (settings.logLevel) this.logLevel = settings.logLevel;
+
+    this.noColour = settings.noColour;
+    this.noTimestamp = settings.noTimestamp;
+    this.noContext = settings.noContext;
+    this.noLevel = settings.noLevel;
   }
   
   handleMessage(logMessage: LogMessage) {

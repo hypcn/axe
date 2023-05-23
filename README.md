@@ -31,7 +31,7 @@ npm install @hypericon/axe
 Example Typescript usage:
 
 ```typescript
-import { defaultAxeManager, ConsoleSink, CONSOLE_SINK, LogLevels, Logger, AxeManager } from "@hypericon/axe";
+import { axeManager, ConsoleSink, CONSOLE_SINK, LogLevels, Logger, AxeManager } from "@hypericon/axe";
 
 const logger = new Logger("MyLogger");
 
@@ -47,29 +47,32 @@ anotherLogger.log("This logger has the context 'Another Logger'");
 // Update the log level filter for the default console sink.
 // Sinks are identified by their unique "name", the default console sink's name is exported
 // from the package.
-defaultAxeManager.setSinkFilter(CONSOLE_SINK, LogLevels.verbose);
-defaultAxeManager.setSinkFilter("Console", "verbose"); // <- this is equivalent, but less robust to change
+axeManager.setSinkFilter(CONSOLE_SINK, LogLevels.verbose);
+axeManager.setSinkFilter("Console", "verbose"); // <- this is equivalent, but less robust to change
 logger.verbose("verbose logs are ignored by default, but this is displayed.");
 
 // Additional sinks can be added.
 // (there is no good reason to have two console sinks, this is just an example)
 const newConsoleSink = "Console2";
-defaultAxeManager.addSink(newConsoleSink, new ConsoleSink(), LogLevels.log);
+axeManager.addSink(new ConsoleSink({
+  name: newConsoleSink,
+  logLevel: LogLevels.log,
+}));
 
 // Separate sinks can have different log filters:
-defaultAxeManager.setSinkFilter(newConsoleSink, LogLevels.warn);
+axeManager.setSinkFilter(newConsoleSink, LogLevels.warn);
 // The current sink  log level filters can be read:
-defaultAxeManager.readSinkFilters(); // { 'Console': 'verbose', 'Console2': 'warn' }
+axeManager.readSinkFilters(); // { 'Console': 'verbose', 'Console2': 'warn' }
 // This is useful for editing which log levels are logged where at runtime
 
 // Separate manager instances can be created,
 // with their own separate sink instances and log level filters
 const newManager = new AxeManager({ withDefaultLogger: true });
 const logger2 = newManager.newLogger("Logger 2");
-logger2.log("This logger's manager 'newManager' is separate from 'defaultAxeManager' above.");
+logger2.log("This logger's manager 'newManager' is separate from 'axeManager' above.");
 logger2.log("This allows them to configure their sinks and common filters separately.");
 
-// Note: the "defaultAxeManager" import from the package is simply a prebuilt instance of
+// Note: the "axeManager" import from the package is simply a prebuilt instance of
 // `AxeManager` with the default console sink.
 ```
 

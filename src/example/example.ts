@@ -1,4 +1,4 @@
-import { defaultAxeManager, ConsoleSink, CONSOLE_SINK, LogLevels, Logger, AxeManager } from "..";
+import { axeManager, ConsoleSink, CONSOLE_SINK, LogLevels, Logger, AxeManager } from "..";
 
 function exampleUsage() {
 
@@ -16,7 +16,8 @@ function exampleUsage() {
   filterLogger.log("By default, only 'debug' logs and above are handled, so:");
   filterLogger.verbose("this verbose log is *not* displayed");
   filterLogger.log("But if the filter is set to 'verbose' for the default console sink:");
-  defaultAxeManager.setSinkFilter(CONSOLE_SINK, LogLevels.verbose);
+  axeManager.setSinkFilter(CONSOLE_SINK, LogLevels.verbose);
+  // axeManager.getSinkByType(ConsoleSink)?.logLevel = LogLevels.verbose;
   filterLogger.verbose("then this second verbose log *is* displayed", "\n");
 
   const sinkLogger = new Logger("Sinks");
@@ -24,26 +25,32 @@ function exampleUsage() {
   sinkLogger.log("More sinks may be added.");
   sinkLogger.log("Adding another console sink, only logging warnings and errors:");
   sinkLogger.debug("(Normally you wouldn't use two console sinks, but this is an example)");
-  defaultAxeManager.addSink(otherConsoleName, new ConsoleSink(), LogLevels.warn);
+  axeManager.addSink(new ConsoleSink({
+    name: otherConsoleName,
+    logLevel: LogLevels.warn,
+  }));
   sinkLogger.warn("this warning is logged twice");
   sinkLogger.log("but this log is only logged once, as the second sink ignores it.", "\n");
 
-  sinkLogger.log("The current sink filters are:", defaultAxeManager.readSinkFilters());
+  sinkLogger.log("The current sink filters are:", axeManager.readSinkFilters());
   sinkLogger.log("If the filter for the second sink is set to 'error':");
-  defaultAxeManager.setSinkFilter(otherConsoleName, "error");
+  axeManager.setSinkFilter(otherConsoleName, "error");
   sinkLogger.warn("then this warning is only displayed once.", "\n");
 
   sinkLogger.log("Adding a sink with the same name throws an error:");
   try {
-    defaultAxeManager.addSink(otherConsoleName, new ConsoleSink(), LogLevels.warn);
+    axeManager.addSink(new ConsoleSink({
+      name: otherConsoleName,
+      logLevel: LogLevels.warn,
+    }));
   } catch (error) {
     sinkLogger.error((error as Error).message);
     sinkLogger.log("...which is displayed twice as there are still two sinks.", "\n");
   }
 
   sinkLogger.log("After removing the other console sink:");
-  defaultAxeManager.removeSink(otherConsoleName);
-  sinkLogger.log("there is only one sink filter remaining:", defaultAxeManager.readSinkFilters(), "\n");
+  axeManager.removeSinkByName(otherConsoleName);
+  sinkLogger.log("there is only one sink filter remaining:", axeManager.readSinkFilters(), "\n");
   
   logger.log("Separate manager instances can be instantiated:");
 
@@ -67,6 +74,8 @@ function exampleUsage() {
   localFilterLogger.log("...so it *can't* display logs");
   localFilterLogger.warn("...but it *can* display warnings");
   logger.log("And other loggers are unaffected.\n");
+
+  // console.log(defaultAxeManager.getSink(ConsoleSink))
 
 }
 exampleUsage();

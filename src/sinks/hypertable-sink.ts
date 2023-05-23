@@ -1,4 +1,4 @@
-import { LogMessage, LogSink } from "../interfaces";
+import { LogLevel, LogLevels, LogMessage, LogSink } from "../interfaces";
 import fetch from "node-fetch";
 
 interface RecordFieldKeys {
@@ -14,6 +14,9 @@ interface RecordFieldKeys {
 export class HypertableSink implements LogSink {
 
   // private logger: Logger
+
+  name: string = this.constructor.name;
+  logLevel: LogLevel = LogLevels.warn;
 
   baseUrl = "https://hypertable.cloud";
   apiKey: string;
@@ -31,12 +34,18 @@ export class HypertableSink implements LogSink {
   };
 
   constructor(settings: {
+    name?: string,
+    logLevel?: LogLevel,
+
     apiKey: string,
     projectId: string,
     collectionId: string,
     baseUrl?: string,
     fieldKeys?: Partial<RecordFieldKeys>,
   }) {
+
+    if (settings.name) this.name = settings.name;
+    if (settings.logLevel) this.logLevel = settings.logLevel;
 
     this.apiKey = settings.apiKey;
     this.projectId = settings.projectId;

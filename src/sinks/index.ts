@@ -1,5 +1,5 @@
 
-export * from "./console-transport";
+export * from "./console-sink";
 export * from "./file-sink";
 export * from "./hypertable-sink";
 export * from "./webhook-sink";

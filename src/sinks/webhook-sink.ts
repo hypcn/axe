@@ -1,8 +1,14 @@
-import { LogMessage, LogSink } from "../interfaces";
+import { LogLevel, LogLevels, LogMessage, LogSink } from "../interfaces";
 
 export class WebhookSink implements LogSink {
 
+  name: string = this.constructor.name;
+  logLevel: LogLevel = LogLevels.warn;
+
   constructor(settings: {
+    name?: string,
+    logLevel?: LogLevel,
+
     /** The URL to which to send the request */
     url: string,
     /**
@@ -15,6 +21,8 @@ export class WebhookSink implements LogSink {
     /** Optionally override the function building the request body */
     buildBody?: (logMessage: LogMessage) => object,
   }) {
+    if (settings.name) this.name = settings.name;
+    if (settings.logLevel) this.logLevel = settings.logLevel;
 
 
   }

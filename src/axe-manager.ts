@@ -3,6 +3,8 @@ import { SinkFilter } from "./interfaces/sink-filter.interface";
 import { Logger } from "./logger";
 import { ConsoleSink } from "./sinks";
 
+export type Class<T> = new (...args: any[]) => T;
+
 /** The name of the default console sink */
 export const CONSOLE_SINK = "Console";
 
@@ -23,17 +25,16 @@ export class AxeManager {
    */
   private loggerInstances: Logger[] = [];
 
-  private sinks = new Map<string, LogSink>();
-
-  // Common sink loglevel filter
-  private commonSinkFilter = new SinkFilter();
+  private sinks: LogSink[] = [];
 
   constructor(options?: { withDefaultConsoleLogger?: boolean }) {
 
     if (options?.withDefaultConsoleLogger) {
-      this.addSink(CONSOLE_SINK, new ConsoleSink({
+      this.addSink(new ConsoleSink({
+        name: CONSOLE_SINK,
+        logLevel: isProd ? LogLevels.debug : LogLevels.log,
         noColour: isProd,
-      }), isProd ? LogLevels.debug : LogLevels.log);
+      }));
     }
 
   }
@@ -72,42 +73,61 @@ export class AxeManager {
 
   // ===== Log Sinks
 
-  addSink(name: string, sink: LogSink, defaultLogLevel: LogLevel) {
-    if (this.sinks.has(name)) {
+  getSinkByName(name: string): LogSink | undefined {
+    return this.sinks.find(s => s.name === name);
+  }
+
+  getSinkByType<T extends LogSink>(sinkClass: Class<T>): T | undefined {
+    return this.sinks.find(s => s.constructor === sinkClass) as T | undefined;
+  }
+
+  addSink(sink: LogSink) {
+    const existingName = this.getSinkByName(sink.name);
+    if (existingName) {
       throw new Error(`Cannot add new sink, name already in use: ${name}`);
     }
-
-    this.sinks.set(name, sink);
-    this.commonSinkFilter.set(name, defaultLogLevel);
+    this.sinks.push(sink);
   }
 
   /**
    * Gracefully stop the specified sink and remove it
    * @param name 
    */
-  removeSink(name: string) {
-    const sink = this.sinks.get(name);
-    sink?.destroy();
-    this.sinks.delete(name);
-    this.commonSinkFilter.remove(name);
+  removeSinkByName(name: string) {
+    const sink = this.getSinkByName(name);
+    if (sink) return this.removeSink(sink);
+  }
+
+  /**
+   * Gracefully stop the given sink and remove it
+   * @param sink 
+   */
+  removeSink(sink: LogSink) {
+    sink.destroy();
+    this.sinks = this.sinks.filter(s => s !== sink);
   }
 
   /**
    * Gracefully stop and remove all defined sinks
    * @param name 
    */
-  async removeAllSinks() {
-    for (const sinkName of this.sinks.keys()) {
-      this.removeSink(sinkName);
+  removeAllSinks() {
+    for (const sink of this.sinks) {
+      this.removeSink(sink);
     }
   }
 
   readSinkFilters() {
-    return this.commonSinkFilter.read();
+    const sinkLogFilters: { [name: string]: LogLevel } = {};
+    for (const sink of this.sinks) {
+      sinkLogFilters[sink.name] = sink.logLevel;
+    }
+    return sinkLogFilters;
   }
 
   setSinkFilter(sinkName: string, logLevel: LogLevel) {
-    return this.commonSinkFilter.set(sinkName, logLevel);
+    const sink = this.getSinkByName(sinkName);
+    if (sink) sink.logLevel = logLevel;
   }
 
   // ===== Handle Log Messages
@@ -129,12 +149,10 @@ export class AxeManager {
 
   handleLogMessage(message: LogMessage, sinkFilter?: SinkFilter) {
 
-    for (const sinkName of this.sinks.keys()) {
-
-      if (this.logLevelSatisfiesFilter(message.level, sinkFilter?.get(sinkName) ?? this.commonSinkFilter.get(sinkName) ?? LogLevels.none)) {
-        this.sinks.get(sinkName)?.handleMessage(message);
+    for (const sink of this.sinks) {
+      if (this.logLevelSatisfiesFilter(message.level, sinkFilter?.get(sink.name) ?? sink.logLevel ?? LogLevels.none)) {
+        sink.handleMessage(message);
       }
-
     }
 
   }
@@ -150,7 +168,7 @@ export class AxeManager {
    * @returns 
    */
   logLevelSatisfiesFilter(logLevel: LogLevel, filterLevel: LogLevel): boolean {
-    // none never satisfies anything, nor can it be satisfied
+    // "none" never satisfies anything, nor can it be satisfied
     if (logLevel === LogLevels.none || filterLevel === LogLevels.none) return false;
 
     return LogLevelNumbers[logLevel] <= LogLevelNumbers[filterLevel];
@@ -161,4 +179,4 @@ export class AxeManager {
 /**
  * The default instance of the manager
  */
-export const defaultAxeManager = new AxeManager({ withDefaultConsoleLogger: true });
+export const axeManager = new AxeManager({ withDefaultConsoleLogger: true });

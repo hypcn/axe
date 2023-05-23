@@ -1,6 +1,6 @@
-import { LogLevel, SimpleLogger, SinkFilter } from "./interfaces";
-import { defaultAxeManager, AxeManager } from "./axe-manager";
 import { inspect } from "util";
+import { AxeManager, axeManager } from "./axe-manager";
+import { SimpleLogger, SinkFilter } from "./interfaces";
 
 export class Logger implements SimpleLogger {
 
@@ -9,7 +9,7 @@ export class Logger implements SimpleLogger {
    * May be undefined if the logger has been destroyed or removed.
    * @internal
    */
-  _manager: AxeManager | undefined = defaultAxeManager;
+  _manager: AxeManager | undefined = axeManager;
 
   /**
    * This logger's context.
