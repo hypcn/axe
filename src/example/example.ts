@@ -1,4 +1,4 @@
-import { Axe, ConsoleTransport, CONSOLE_TRANSPORT, LogLevels, Logger, LoggerCore } from "..";
+import { Axe, ConsoleTransport, CONSOLE_TRANSPORT, LogLevels, Logger, AxeCore } from "..";
 
 function exampleUsage() {
 
@@ -45,19 +45,19 @@ function exampleUsage() {
   Axe.removeTransport(otherConsoleName);
   transportLogger.log("there is only one transport filter remaining:", Axe.readTransportFilters(), "\n");
   
-  logger.log("Separate instances of LoggerCore can be instantiated:");
+  logger.log("Separate instances of the core can be instantiated:");
 
-  const loggerCore = new LoggerCore({ withDefaultConsoleLogger: true });
-  const newCoreLogger = loggerCore.newLogger("New Instance");
+  const Axe2 = new AxeCore({ withDefaultConsoleLogger: true });
+  const newCoreLogger = Axe2.newLogger("New Instance");
   newCoreLogger.log("...so this logger does not share any settings with the other two.");
-  newCoreLogger.log("For example, if this instance of LoggerCore is set to only log errors:");
-  loggerCore.setTransportFilter(CONSOLE_TRANSPORT, LogLevels.error);
+  newCoreLogger.log("For example, if this instance of the core is set to only log errors:");
+  Axe2.setTransportFilter(CONSOLE_TRANSPORT, LogLevels.error);
 
   logger.log("...then this logger can still display logs");
   contextLogger.log("...and so can this one");
   newCoreLogger.log("...but *not* this one");
   newCoreLogger.error("...though it can still display errors.");
-  logger.log("The default LoggerCore instance is exported from the package as 'Axe'.\n");
+  logger.log("The default core instance is exported from the package as 'Axe'.\n");
 
   const localFilterLogger = new Logger("Local Filter");
 

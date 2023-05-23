@@ -1,5 +1,5 @@
 import { LogLevel, SimpleLogger, TransportFilter } from "./interfaces";
-import { Axe, LoggerCore } from "./logger-core";
+import { Axe, AxeCore } from "./axe-core";
 
 export class Logger implements SimpleLogger {
 
@@ -8,7 +8,7 @@ export class Logger implements SimpleLogger {
    * May be undefined if the logger has been destroyed for some reason.
    * @internal
    */
-  _core: LoggerCore | undefined = Axe;
+  _core: AxeCore | undefined = Axe;
 
   /**
    * This logger's context.

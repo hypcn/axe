@@ -9,7 +9,7 @@ export const CONSOLE_TRANSPORT = "Console";
 
 const isProd = process.env.NODE_ENV === "production";
 
-export class LoggerCore {
+export class AxeCore {
 
   // commonSettings = {  };
   commonContext: string = "";
@@ -173,4 +173,4 @@ export class LoggerCore {
 /**
  * The default instance of the logger core
  */
-export const Axe = new LoggerCore({ withDefaultConsoleLogger: true });
+export const Axe = new AxeCore({ withDefaultConsoleLogger: true });
