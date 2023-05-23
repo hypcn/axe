@@ -265,7 +265,7 @@ logger.log("A message logged to a file");
 
 ## HypertableSink
 
-Log messages to the [Hypertable](https://hypertable.co.uk).
+Log messages to the [Hypertable](https://hypertable.co.uk). For each new message, a new Record is created within a target Collection, with the data from the logged message written to the new Record.
 
 Example:
 
@@ -276,10 +276,21 @@ axeManager.removeAllSinks();
 axeManager.addSink(new HypertableSink({
   name: "HypertableSink",
   logLevel: LogLevels.log,
+
+  /** Hypertable API key with permission to create a Record */
+  apiKey: string,
+  /** The ID of the Project in which to create the new Record */
+  projectId: string,
+  /** The ID of the Collection in which to create the new Record */
+  collectionId: string,
+  /** Optionally override the Hypertable base URL */
+  baseUrl?: string,
+  /** Optionally override the field keys within the created Record */
+  fieldKeys?: Partial<RecordFieldKeys>,
 }));
 
 const logger = new Logger("Example");
-logger.log("A message logged to a Hypertable record");
+logger.log("A message logged to a new Hypertable record");
 ```
 
 ## ObservableSink
@@ -298,6 +309,7 @@ const sink = new ObservableSink({
 });
 axeManager.addSink(sink);
 
+// This would be consumed by the application after the desired log messages had been aggregated
 sink.logMessage$.subscribe(msg => {
   // ...
 });

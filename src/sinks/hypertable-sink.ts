@@ -37,10 +37,15 @@ export class HypertableSink implements LogSink {
     name?: string,
     logFilter?: LogLevel,
 
+    /** Hypertable API key with permission to create a Record */
     apiKey: string,
+    /** The ID of the Project in which to create the new Record */
     projectId: string,
+    /** The ID of the Collection in which to create the new Record */
     collectionId: string,
+    /** Optionally override the Hypertable base URL */
     baseUrl?: string,
+    /** Optionally override the field keys within the created Record */
     fieldKeys?: Partial<RecordFieldKeys>,
   }) {
 
