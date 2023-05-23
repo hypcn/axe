@@ -7,6 +7,7 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsc -w --preserveWatchOutput",
+    "example": "node dist/example/example.js",
     "prebuild": "rimraf dist",
     "build": "tsc --project tsconfig.build.json",
     "prepublishOnly": "npm run build",
