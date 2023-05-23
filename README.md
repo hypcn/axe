@@ -254,13 +254,49 @@ Example:
 import { Logger, axeManager, LogLevels, FileSink } from "@hypericon/axe";
 
 axeManager.removeAllSinks();
-axeManager.addSink(new FileSink({
+const sink = new FileSink({
   name: "FileSink",
   logLevel: LogLevels.log,
-}));
+
+  /**
+   * Full path to the dir containing the log files
+   * @default join(process.cwd(), "logs")
+   */
+  logDirPath?: string,
+  /**
+   * Function to build the filenames for new log files.
+   * 
+   * @default
+   * () => {
+   *   const logDate = new Date().toISOString()
+   *     .replace(/:/g, "-")
+   *     .replace(/\./g, "_");
+   *   const logFileName = `${logDate}.txt`;
+   *   return logFileName;
+   *   // example: "2023-01-31T10-35-12_345Z.txt"
+   * }
+   */
+  logFilenameFn?: () => string,
+});
+axeManager.addSink(sink);
 
 const logger = new Logger("Example");
 logger.log("A message logged to a file");
+
+// Open a new log file.
+// This can be useful to run on a schedule, so log files don't get too large,
+// and so that logs are stored in a file with a relevant filename.
+// For example, run this every midnight with the default `logFilenameFn` to
+// (more or less) store all logs in a files named with the midnight timestamp.
+sink.openNewFile();
+
+// Interact with log files
+
+// List existing log files
+sink.listLogFiles(): Promise<{ logFiles: LogFileInfo[] }>;
+
+// Read a particular log file
+sink.readLogFile(filename: string): Promise<{ filename: string, contents: string }>;
 ```
 
 ## HypertableSink
