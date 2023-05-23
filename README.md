@@ -11,6 +11,7 @@ Includes multiple built-in log sinks, with a simple API for adding arbitrary log
 - Hypertable ([usage](#HypertableSink)) ([website](https://hypertable.co.uk))
 - Rxjs observable ([usage](#ObservableSink))
 - Webhook ([usage](#WebhookSink))
+- Custom sink ([usage](#LogSink))
 
 Includes fine-grained filtering of logs by log level
 
