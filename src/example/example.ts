@@ -55,7 +55,7 @@ function exampleUsage() {
   logger.log("Separate manager instances can be instantiated:");
 
   const axeManager2 = new AxeManager({ withDefaultConsoleLogger: true });
-  const newMgrLogger = axeManager2.newLogger("New Manager");
+  const newMgrLogger = axeManager2.createLogger("New Manager");
   newMgrLogger.log("...so this logger does not share any settings with the other two.");
   newMgrLogger.log("For example, if this manager is set to only log errors:");
   axeManager2.setSinkFilter(CONSOLE_SINK, LogLevels.error);

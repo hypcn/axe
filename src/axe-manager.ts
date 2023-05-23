@@ -46,7 +46,7 @@ export class AxeManager {
    * @param context 
    * @returns 
    */
-  newLogger(context?: string) {
+  createLogger(context?: string) {
     const logger = new Logger(context);
     this.addLogger(logger);
     return logger;
@@ -117,7 +117,7 @@ export class AxeManager {
     }
   }
 
-  readSinkFilters() {
+  readSinkFilters(): { [name: string]: LogLevel } {
     const sinkLogFilters: { [name: string]: LogLevel } = {};
     for (const sink of this.sinks) {
       sinkLogFilters[sink.name] = sink.logFilter;

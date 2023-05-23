@@ -18,7 +18,7 @@ export interface LogSink {
   logFilter: LogLevel,
 
   /**
-   * 
+   * Handle a logged message. The message does not need to be filtered again.
    * @param logMessage 
    */
   handleMessage(logMessage: LogMessage): any,
