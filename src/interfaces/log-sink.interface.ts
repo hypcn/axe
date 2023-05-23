@@ -1,6 +1,6 @@
 import { LogMessage } from "./log-message.interface";
 
-export interface LogTransport {
+export interface LogSink {
 
   /**
    * 
@@ -9,7 +9,7 @@ export interface LogTransport {
   handleMessage(logMessage: LogMessage): any,
 
   /**
-   * Gracefully destroy the transport. It cannot be used again.
+   * Gracefully destroy the sink. It cannot be used again.
    */
   destroy(): any,
   

@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import { LogLevelNameLeft, LogLevels } from "../interfaces";
 import { LogMessage } from "../interfaces/log-message.interface";
-import { LogTransport } from "../interfaces/log-transport.interface";
+import { LogSink } from "../interfaces/log-sink.interface";
 
 const LOG_LEVEL_COLOUR_FNS = {
   [LogLevels.none]: chalk.bgRedBright,
@@ -14,7 +14,7 @@ const LOG_LEVEL_COLOUR_FNS = {
 
 const CONTEXT_COLOUR_FN = chalk.yellow;
 
-export class ConsoleTransport implements LogTransport {
+export class ConsoleSink implements LogSink {
 
   noColour?: boolean;
   noTimestamp?: boolean;

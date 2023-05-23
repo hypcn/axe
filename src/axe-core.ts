@@ -1,11 +1,11 @@
 import { inspect } from "util";
-import { LogLevel, LogLevelNumbers, LogLevels, LogMessage, LogTransport } from "./interfaces";
-import { ConsoleTransport } from "./transports";
+import { LogLevel, LogLevelNumbers, LogLevels, LogMessage, LogSink } from "./interfaces";
+import { ConsoleSink } from "./sinks";
 import { Logger } from "./logger";
-import { TransportFilter } from "./interfaces/transport-filter.interface";
+import { SinkFilter } from "./interfaces/sink-filter.interface";
 
-/** The name of the default console transport */
-export const CONSOLE_TRANSPORT = "Console";
+/** The name of the default console sink */
+export const CONSOLE_SINK = "Console";
 
 const isProd = process.env.NODE_ENV === "production";
 
@@ -20,20 +20,20 @@ export class AxeCore {
   commonProcessId: string = process.pid.toString();
 
   /**
-   * Weak references to Logger instances, to make them available for centralised transport and
+   * Weak references to Logger instances, to make them available for centralised sink and
    * log level configuration via API
    */
   private loggerInstances: Logger[] = [];
 
-  private transports = new Map<string, LogTransport>();
+  private sinks = new Map<string, LogSink>();
 
-  // some sort of common mapping of LogLevels to transports
-  private commonTransportFilter = new TransportFilter();
+  // Common sink loglevel filter
+  private commonSinkFilter = new SinkFilter();
 
   constructor(options?: { withDefaultConsoleLogger?: boolean }) {
 
     if (options?.withDefaultConsoleLogger) {
-      this.addTransport(CONSOLE_TRANSPORT, new ConsoleTransport({
+      this.addSink(CONSOLE_SINK, new ConsoleSink({
         noColour: isProd,
       }), isProd ? LogLevels.debug : LogLevels.log);
     }
@@ -68,44 +68,44 @@ export class AxeCore {
     logger._core = undefined;
   }
 
-  // ===== Log Transports
+  // ===== Log Sinks
 
-  addTransport(name: string, transport: LogTransport, defaultLogLevel: LogLevel) {
-    if (this.transports.has(name)) {
-      throw new Error(`Cannot add new transport, name already in use: ${name}`);
+  addSink(name: string, sink: LogSink, defaultLogLevel: LogLevel) {
+    if (this.sinks.has(name)) {
+      throw new Error(`Cannot add new sink, name already in use: ${name}`);
     }
 
-    this.transports.set(name, transport);
-    this.commonTransportFilter.set(name, defaultLogLevel);
+    this.sinks.set(name, sink);
+    this.commonSinkFilter.set(name, defaultLogLevel);
   }
 
   /**
-   * Gracefully stop the specified transport and remove it
+   * Gracefully stop the specified sink and remove it
    * @param name 
    */
-  removeTransport(name: string) {
-    const transport = this.transports.get(name);
-    transport?.destroy();
-    this.transports.delete(name);
-    this.commonTransportFilter.remove(name);
+  removeSink(name: string) {
+    const sink = this.sinks.get(name);
+    sink?.destroy();
+    this.sinks.delete(name);
+    this.commonSinkFilter.remove(name);
   }
 
   /**
-   * Gracefully stop and remove all defined transports
+   * Gracefully stop and remove all defined sinks
    * @param name 
    */
-  async removeAllTransports(name: string) {
-    for (const transportName of this.transports.keys()) {
-      this.removeTransport(transportName);
+  async removeAllSinks() {
+    for (const sinkName of this.sinks.keys()) {
+      this.removeSink(sinkName);
     }
   }
 
-  readTransportFilters() {
-    return this.commonTransportFilter.read();
+  readSinkFilters() {
+    return this.commonSinkFilter.read();
   }
 
-  setTransportFilter(transportName: string, logLevel: LogLevel) {
-    return this.commonTransportFilter.set(transportName, logLevel);
+  setSinkFilter(sinkName: string, logLevel: LogLevel) {
+    return this.commonSinkFilter.set(sinkName, logLevel);
   }
 
   // ===== Perform Logging
@@ -139,20 +139,20 @@ export class AxeCore {
 
   }
 
-  transportLogMessage(message: LogMessage, transportFilter?: TransportFilter) {
+  sinkLogMessage(message: LogMessage, sinkFilter?: SinkFilter) {
 
-    for (const transportName of this.transports.keys()) {
+    for (const sinkName of this.sinks.keys()) {
 
-      if (this.logLevelSatisfiesFilter(message.level, transportFilter?.get(transportName) ?? this.commonTransportFilter.get(transportName) ?? LogLevels.none)) {
-        this.transports.get(transportName)?.handleMessage(message);
+      if (this.logLevelSatisfiesFilter(message.level, sinkFilter?.get(sinkName) ?? this.commonSinkFilter.get(sinkName) ?? LogLevels.none)) {
+        this.sinks.get(sinkName)?.handleMessage(message);
       }
 
     }
 
   }
 
-  buildLogMessageAndTransport(partialMsg: Partial<LogMessage>, transportFilter?: TransportFilter) {
-    return this.transportLogMessage(this.buildLogMessage(partialMsg), transportFilter);
+  buildLogMessageAndSink(partialMsg: Partial<LogMessage>, sinkFilter?: SinkFilter) {
+    return this.sinkLogMessage(this.buildLogMessage(partialMsg), sinkFilter);
   }
 
   /**

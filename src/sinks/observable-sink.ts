@@ -1,7 +1,7 @@
 import { Subject } from "rxjs";
-import { LogMessage, LogTransport } from "../interfaces";
+import { LogMessage, LogSink } from "../interfaces";
 
-export class ObservableTransport implements LogTransport {
+export class ObservableSink implements LogSink {
 
   private _logMessage = new Subject<LogMessage>();
   public logMessage$ = this._logMessage.asObservable();

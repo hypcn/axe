@@ -1,6 +1,6 @@
-import { LogMessage, LogTransport } from "../interfaces";
+import { LogMessage, LogSink } from "../interfaces";
 
-export class WebsocketTransport implements LogTransport {
+export class WebsocketSink implements LogSink {
 
   constructor(settings: {
 

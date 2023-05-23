@@ -1,8 +1,8 @@
-import { LogMessage, LogTransport } from "../interfaces";
+import { LogMessage, LogSink } from "../interfaces";
 
 // default but overrideable field keys?
 
-export class HypertableTransport implements LogTransport {
+export class HypertableSink implements LogSink {
 
 
   constructor(settings: {

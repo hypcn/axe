@@ -1,6 +1,6 @@
-import { LogMessage, LogTransport } from "../interfaces";
+import { LogMessage, LogSink } from "../interfaces";
 
-export class WebhookTransport implements LogTransport {
+export class WebhookSink implements LogSink {
 
   constructor(settings: {
     /** The URL to which to send the request */

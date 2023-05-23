@@ -3,4 +3,4 @@ export * from "./axe-core";
 export * from "./logger";
 
 export * from "./interfaces";
-export * from "./transports";
+export * from "./sinks";

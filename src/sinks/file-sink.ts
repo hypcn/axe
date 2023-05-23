@@ -1,11 +1,11 @@
-import { LogMessage, LogTransport } from "../interfaces";
+import { LogMessage, LogSink } from "../interfaces";
 
 // default filename template?
 // path?
 
 // method to delete older than?
 
-export class FileTransport implements LogTransport {
+export class FileSink implements LogSink {
 
 
   constructor(settings?: {
