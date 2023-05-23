@@ -6,11 +6,11 @@ A simple tool for logging. (Ha ha.)
 
 Includes multiple built-in log sinks, with a simple API for adding arbitrary log handers
 
-- Console
-- File
-- Webhook
-- Rxjs observable
-- [Hypertable](https://hypertable.co.uk)
+- Console ([usage](#ConsoleSink))
+- File ([usage](#FileSink))
+- Hypertable ([usage](#HypertableSink)) ([website](https://hypertable.co.uk))
+- Rxjs observable ([usage](#ObservableSink))
+- Webhook ([usage](#WebhookSink))
 
 Includes fine-grained filtering of logs by log level
 
