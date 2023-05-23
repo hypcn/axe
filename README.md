@@ -4,7 +4,7 @@
 
 A simple tool for logging. (Ha ha.)
 
-Includes multiple built-in log sinks, with a simple API for adding arbitray log handers
+Includes multiple built-in log sinks, with a simple API for adding arbitrary log handers
 
 - Console
 - File

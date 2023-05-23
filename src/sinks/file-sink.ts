@@ -8,15 +8,15 @@ import { LogLevel, LogLevels, LogMessage, LogSink } from "../interfaces";
 export class FileSink implements LogSink {
 
   name: string = this.constructor.name;
-  logLevel: LogLevel = LogLevels.log;
+  logFilter: LogLevel = LogLevels.log;
 
   constructor(settings: {
     name?: string,
-    logLevel?: LogLevel,
+    logFilter?: LogLevel,
 
   }) {
     if (settings.name) this.name = settings.name;
-    if (settings.logLevel) this.logLevel = settings.logLevel;
+    if (settings.logFilter) this.logFilter = settings.logFilter;
 
 
   }

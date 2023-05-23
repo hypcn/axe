@@ -17,7 +17,7 @@ function exampleUsage() {
   filterLogger.verbose("this verbose log is *not* displayed");
   filterLogger.log("But if the filter is set to 'verbose' for the default console sink:");
   axeManager.setSinkFilter(CONSOLE_SINK, LogLevels.verbose);
-  // axeManager.getSinkByType(ConsoleSink)?.logLevel = LogLevels.verbose;
+  // axeManager.findSink(ConsoleSink)?.logLevel = LogLevels.verbose;
   filterLogger.verbose("then this second verbose log *is* displayed", "\n");
 
   const sinkLogger = new Logger("Sinks");
@@ -27,7 +27,7 @@ function exampleUsage() {
   sinkLogger.debug("(Normally you wouldn't use two console sinks, but this is an example)");
   axeManager.addSink(new ConsoleSink({
     name: otherConsoleName,
-    logLevel: LogLevels.warn,
+    logFilter: LogLevels.warn,
   }));
   sinkLogger.warn("this warning is logged twice");
   sinkLogger.log("but this log is only logged once, as the second sink ignores it.", "\n");
@@ -41,7 +41,7 @@ function exampleUsage() {
   try {
     axeManager.addSink(new ConsoleSink({
       name: otherConsoleName,
-      logLevel: LogLevels.warn,
+      logFilter: LogLevels.warn,
     }));
   } catch (error) {
     sinkLogger.error((error as Error).message);

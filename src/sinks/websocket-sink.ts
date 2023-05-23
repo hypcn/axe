@@ -3,15 +3,15 @@ import { LogLevel, LogLevels, LogMessage, LogSink } from "../interfaces";
 export class WebsocketSink implements LogSink {
 
   name: string = this.constructor.name;
-  logLevel: LogLevel = LogLevels.warn;
+  logFilter: LogLevel = LogLevels.warn;
 
   constructor(settings: {
     name?: string,
-    logLevel?: LogLevel,
+    logFilter?: LogLevel,
 
   }) {
     if (settings.name) this.name = settings.name;
-    if (settings.logLevel) this.logLevel = settings.logLevel;
+    if (settings.logFilter) this.logFilter = settings.logFilter;
 
 
   }

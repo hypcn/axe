@@ -1,6 +1,7 @@
 import { inspect } from "util";
 import { AxeManager, axeManager } from "./axe-manager";
-import { SimpleLogger, SinkFilter } from "./interfaces";
+import { SimpleLogger } from "./interfaces";
+import { SinkFilter } from "./sink-filter";
 
 export class Logger implements SimpleLogger {
 

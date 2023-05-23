@@ -1,4 +1,4 @@
-import { LogLevel } from "./log-level.interface";
+import { LogLevel } from "./interfaces/log-level.interface";
 
 /**
  * Define log sink filters by log level, to control which messages can be

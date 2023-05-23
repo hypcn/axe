@@ -15,7 +15,7 @@ export interface LogSink {
    * 
    * This can be overridden by individual logger instances.
    */
-  logLevel: LogLevel,
+  logFilter: LogLevel,
 
   /**
    * 

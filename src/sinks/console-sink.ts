@@ -17,7 +17,7 @@ const CONTEXT_COLOUR_FN = chalk.yellow;
 export class ConsoleSink implements LogSink {
 
   name: string = this.constructor.name;
-  logLevel: LogLevel = LogLevels.debug;
+  logFilter: LogLevel = LogLevels.debug;
 
   noColour?: boolean;
   noTimestamp?: boolean;
@@ -26,7 +26,7 @@ export class ConsoleSink implements LogSink {
 
   constructor(settings: {
     name?: string,
-    logLevel?: LogLevel,
+    logFilter?: LogLevel,
 
     noColour?: boolean,
     noTimestamp?: boolean,
@@ -34,7 +34,7 @@ export class ConsoleSink implements LogSink {
     noContext?: boolean,
   }) {
     if (settings.name) this.name = settings.name;
-    if (settings.logLevel) this.logLevel = settings.logLevel;
+    if (settings.logFilter) this.logFilter = settings.logFilter;
 
     this.noColour = settings.noColour;
     this.noTimestamp = settings.noTimestamp;

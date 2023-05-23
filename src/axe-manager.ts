@@ -1,5 +1,5 @@
 import { LogLevel, LogLevelNumbers, LogLevels, LogMessage, LogSink } from "./interfaces";
-import { SinkFilter } from "./interfaces/sink-filter.interface";
+import { SinkFilter } from "./sink-filter";
 import { Logger } from "./logger";
 import { ConsoleSink } from "./sinks";
 
@@ -32,7 +32,7 @@ export class AxeManager {
     if (options?.withDefaultConsoleLogger) {
       this.addSink(new ConsoleSink({
         name: CONSOLE_SINK,
-        logLevel: isProd ? LogLevels.debug : LogLevels.log,
+        logFilter: isProd ? LogLevels.debug : LogLevels.log,
         noColour: isProd,
       }));
     }
@@ -73,16 +73,16 @@ export class AxeManager {
 
   // ===== Log Sinks
 
-  getSinkByName(name: string): LogSink | undefined {
+  findSinkByName(name: string): LogSink | undefined {
     return this.sinks.find(s => s.name === name);
   }
 
-  getSinkByType<T extends LogSink>(sinkClass: Class<T>): T | undefined {
+  findSink<T extends LogSink>(sinkClass: Class<T>): T | undefined {
     return this.sinks.find(s => s.constructor === sinkClass) as T | undefined;
   }
 
   addSink(sink: LogSink) {
-    const existingName = this.getSinkByName(sink.name);
+    const existingName = this.findSinkByName(sink.name);
     if (existingName) {
       throw new Error(`Cannot add new sink, name already in use: ${name}`);
     }
@@ -94,7 +94,7 @@ export class AxeManager {
    * @param name 
    */
   removeSinkByName(name: string) {
-    const sink = this.getSinkByName(name);
+    const sink = this.findSinkByName(name);
     if (sink) return this.removeSink(sink);
   }
 
@@ -120,14 +120,14 @@ export class AxeManager {
   readSinkFilters() {
     const sinkLogFilters: { [name: string]: LogLevel } = {};
     for (const sink of this.sinks) {
-      sinkLogFilters[sink.name] = sink.logLevel;
+      sinkLogFilters[sink.name] = sink.logFilter;
     }
     return sinkLogFilters;
   }
 
   setSinkFilter(sinkName: string, logLevel: LogLevel) {
-    const sink = this.getSinkByName(sinkName);
-    if (sink) sink.logLevel = logLevel;
+    const sink = this.findSinkByName(sinkName);
+    if (sink) sink.logFilter = logLevel;
   }
 
   // ===== Handle Log Messages
@@ -150,7 +150,7 @@ export class AxeManager {
   handleLogMessage(message: LogMessage, sinkFilter?: SinkFilter) {
 
     for (const sink of this.sinks) {
-      if (this.logLevelSatisfiesFilter(message.level, sinkFilter?.get(sink.name) ?? sink.logLevel ?? LogLevels.none)) {
+      if (this.logLevelSatisfiesFilter(message.level, sinkFilter?.get(sink.name) ?? sink.logFilter)) {
         sink.handleMessage(message);
       }
     }
