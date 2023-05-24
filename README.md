@@ -9,7 +9,7 @@ Includes multiple built-in log sinks, with a simple API for adding arbitrary log
 - Console ([usage](#ConsoleSink))
 - File ([usage](#FileSink))
 - Hypertable ([usage](#HypertableSink)) ([website](https://hypertable.co.uk))
-- Rxjs observable ([usage](#ObservableSink))
+- RxJS observable ([usage](#ObservableSink))
 - Webhook ([usage](#WebhookSink))
 - Custom sink ([usage](#LogSink))
 
@@ -338,7 +338,9 @@ logger.log("A message logged to a new Hypertable record");
 
 ## ObservableSink
 
-Log messages to an [Rxjs]() observable, so they can be easily consumed elsewhere in the application.
+Log messages to an [RxJS](https://github.com/ReactiveX/rxjs) observable, so they can be easily consumed elsewhere in the application.
+
+> Note: RxJS is a peer dependency of Axe, and must be installed separately.
 
 Example:
 
