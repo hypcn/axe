@@ -69,13 +69,7 @@ export class HypertableSink implements LogSink {
 
   }
 
-  handleMessage(logMessage: LogMessage) {
-
-    throw new Error("Method not implemented.");
-
-  }
-
-  async uploadLog(log: LogMessage) {
+  async handleMessage(log: LogMessage) {
 
     const url = `${this.baseUrl}/api/v1/data/projects/${this.projectId}/collections/${this.collectionId}/records`;
 
