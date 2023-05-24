@@ -151,6 +151,10 @@ const logger1 = new Logger("1"); // manager -> `axeManager`
 const anotherManager = new AxeManager();
 const logger2 = anotherManager.createLogger("2"); // manager -> `anotherManager`
 
+// Alternatively, create a Logger with the default manager, then move it to another manager
+const logger3 = new Logger("3");
+anotherManager.addLogger(logger3); // moves the logger from the default `axeManager` to the new manager
+
 // `LogSink`s are managed in `AxeManager` instances separately
 axeManager.addSink(...);
 anotherManager.addSink(...);
@@ -229,6 +233,8 @@ logger.log("A message");
 ## ConsoleSink
 
 Log messages to the console.
+
+A single `ConsoleSink` is included by in the default `axeManager` instance exported from the library.
 
 Example:
 
