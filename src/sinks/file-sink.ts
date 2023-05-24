@@ -68,6 +68,8 @@ export class FileSink implements LogSink {
     if (settings.logFilenameFn) this.logFilenameFn = settings.logFilenameFn;
 
     this.ensureLogDir();
+
+    this.openNewFile();
   }
 
   handleMessage(logMessage: LogMessage) {
@@ -84,7 +86,7 @@ export class FileSink implements LogSink {
   }
 
   destroy() {
-    // TODO: close file
+    this.logStream?.end();
   }
 
   openNewFile() {
@@ -152,7 +154,7 @@ export class FileSink implements LogSink {
 
     this.logStream = createWriteStream(logFilePath, {
       encoding: "utf-8",
-      flags: "w",
+      flags: "a",
     });
 
     this.logStream.on("close", () => {
@@ -195,11 +197,11 @@ export class FileSink implements LogSink {
 
     while (this.lineBuffer.length > 0) {
       const buffered = this.lineBuffer.splice(0, 1)[0];
-      // CONSOLE && console.log(`Writing line: ${buffered}`);
+      DEBUG && console.log(`Writing buffered line: ${buffered}`);
       this.logStream.write(buffered);
     }
 
-    // CONSOLE && console.log(`Writing line: ${line}`);
+    DEBUG && console.log(`Writing line: ${line}`);
     this.logStream.write(line);
 
   }
