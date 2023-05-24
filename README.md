@@ -70,7 +70,7 @@ axeManager.readSinkFilters(); // { 'Console': 'verbose', 'Console2': 'warn' }
 
 // Separate manager instances can be created,
 // with their own separate sink instances and log level filters
-const newManager = new AxeManager({ withDefaultLogger: true });
+const newManager = new AxeManager({ withDefaultConsoleSink: true });
 const logger2 = newManager.newLogger("Logger 2");
 logger2.log("This logger's manager 'newManager' is separate from 'axeManager' above.");
 logger2.log("This allows them to configure their sinks and common filters separately.");

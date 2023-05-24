@@ -27,9 +27,9 @@ export class AxeManager {
 
   private sinks: LogSink[] = [];
 
-  constructor(options?: { withDefaultConsoleLogger?: boolean }) {
+  constructor(options?: { withDefaultConsoleSink?: boolean }) {
 
-    if (options?.withDefaultConsoleLogger) {
+    if (options?.withDefaultConsoleSink) {
       this.addSink(new ConsoleSink({
         name: CONSOLE_SINK,
         logFilter: isProd ? LogLevels.debug : LogLevels.log,
@@ -179,4 +179,4 @@ export class AxeManager {
 /**
  * The default instance of the manager
  */
-export const axeManager = new AxeManager({ withDefaultConsoleLogger: true });
+export const axeManager = new AxeManager({ withDefaultConsoleSink: true });
