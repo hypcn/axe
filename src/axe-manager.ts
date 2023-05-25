@@ -27,6 +27,9 @@ export class AxeManager {
 
   private sinks: LogSink[] = [];
 
+  get loggerCount() { return this.loggerInstances.length; }
+  get sinkCount() { return this.sinks.length; }
+
   constructor(options?: { withDefaultConsoleSink?: boolean }) {
 
     if (options?.withDefaultConsoleSink) {
