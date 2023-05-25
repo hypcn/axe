@@ -10,7 +10,7 @@
     "example": "node dist/example/example.js",
     "prebuild": "rimraf dist",
     "build": "tsc --project tsconfig.build.json",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "npm test && npm run build",
     "test": "jest"
   },
   "peerDependencies": {
