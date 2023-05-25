@@ -54,7 +54,7 @@ describe("logger", () => {
     });
   });
 
-  it("can log filter out warnings", () => {
+  it("can filter out warnings", () => {
     return new Promise<void>((resolve, reject) => {
 
       const manager = new AxeManager();
@@ -97,7 +97,7 @@ describe("logger", () => {
     });
   });
 
-  it("can log filter out log messages", () => {
+  it("can filter out log messages", () => {
     return new Promise<void>((resolve, reject) => {
 
       const manager = new AxeManager();
@@ -140,7 +140,7 @@ describe("logger", () => {
     });
   });
 
-  it("can log filter out debug messages", () => {
+  it("can filter out debug messages", () => {
     return new Promise<void>((resolve, reject) => {
 
       const manager = new AxeManager();
@@ -183,7 +183,7 @@ describe("logger", () => {
     });
   });
 
-  it("can log filter out verbose messages", () => {
+  it("can filter out verbose messages", () => {
     return new Promise<void>((resolve, reject) => {
 
       const manager = new AxeManager();
@@ -229,6 +229,30 @@ describe("logger", () => {
     });
   });
 
-  // TODO: sinkFilter
+  it("can override sink log filters", () => {
+    return new Promise<void>((resolve, reject) => {
+
+      const manager = new AxeManager();
+      const sinkName = "sink";
+
+      manager.addSink({
+        name: sinkName,
+        logFilter: LogLevels.error,
+        destroy: () => { },
+        handleMessage: (msg) => {
+          expect(msg.level).toBe(LogLevels.warn);
+          expect(msg.message).toBe("warn");
+          resolve();
+        },
+      });
+
+      const logger = manager.createLogger();
+      logger.sinkFilter.set(sinkName, LogLevels.warn);
+
+      logger.log("log");
+      logger.warn("warn");
+
+    });
+  });
 
 });
