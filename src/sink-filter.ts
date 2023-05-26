@@ -1,4 +1,4 @@
-import { LogLevel } from "./interfaces/log-level.interface";
+import { LogLevel, LogLevelNumbers } from "./interfaces/log-level.interface";
 
 /**
  * Define log sink filters by log level, to control which messages can be
@@ -9,15 +9,33 @@ export class SinkFilter {
   private filter = new Map<string, LogLevel>();
 
   /**
+   * A minimum log level applied to all sinks, whether or not they are explicitly set
+   * in this filter
+   */
+  all: LogLevel | undefined = undefined;
+
+  private maxFilterLevel(a: LogLevel | undefined, b: LogLevel | undefined): LogLevel | undefined {
+    if (!a && !b) return undefined;
+    if (a && !b) return a;
+    if (!a && b) return b;
+    return (LogLevelNumbers[a!] <= LogLevelNumbers[b!]) ? a : b;
+  }
+
+  /**
    * Read all the defined filters as an object. Will be empty if no filters have been set.
    * @returns 
    */
   read(): { [sinkName: string]: LogLevel } {
     const keys = new Array(...this.filter.keys());
     const filters: { [sinkName: string]: LogLevel } = {};
+
     for (const key of keys) {
       filters[key] = this.filter.get(key)!;
     }
+    if (this.all !== undefined) {
+      filters["_all"] = this.all;
+    }
+
     return filters;
   }
 
@@ -27,7 +45,7 @@ export class SinkFilter {
    * @returns 
    */
   get(sinkName: string) {
-    return this.filter.get(sinkName);
+    return this.maxFilterLevel(this.all, this.filter.get(sinkName));
   }
 
   /**
