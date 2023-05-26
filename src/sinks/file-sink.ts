@@ -60,6 +60,13 @@ export class FileSink implements LogSink {
      * }
      */
     logFilenameFn?: () => string,
+
+    /**
+     * By default, a new log file is created when the sink is.
+     * Set this flag to `true` to disable this behaviour. A new file must
+     * then be opened manually.
+     */
+    noOpenOnCreate?: boolean,
   }) {
     if (settings.name) this.name = settings.name;
     if (settings.logFilter) this.logFilter = settings.logFilter;
@@ -67,9 +74,9 @@ export class FileSink implements LogSink {
     if (settings.logDirPath) this.logDirPath = settings.logDirPath;
     if (settings.logFilenameFn) this.logFilenameFn = settings.logFilenameFn;
 
-    this.ensureLogDir();
-
-    this.openNewFile();
+    if (settings.noOpenOnCreate !== false) {
+      this.openNewFile();
+    }
   }
 
   handleMessage(logMessage: LogMessage) {
@@ -90,6 +97,8 @@ export class FileSink implements LogSink {
   }
 
   openNewFile() {
+
+    this.ensureLogDir();
 
     this.streamReady = false;
 
