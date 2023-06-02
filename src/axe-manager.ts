@@ -87,7 +87,7 @@ export class AxeManager {
   addSink(sink: LogSink) {
     const existingName = this.findSinkByName(sink.name);
     if (existingName) {
-      throw new Error(`Cannot add new sink, name already in use: ${name}`);
+      throw new Error(`Cannot add new sink, name already in use: ${sink.name}`);
     }
     this.sinks.push(sink);
   }

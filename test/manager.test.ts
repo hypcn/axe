@@ -68,17 +68,26 @@ describe("manager", () => {
     manager.addSink(sink);
 
     expect(manager.sinkCount).toBe(count + 1);
+    expect(() => manager.addSink(sink)).toThrow();
   });
 
-  it("can remove a sink", () => {
+  it("can remove sinks", () => {
     const manager = new AxeManager();
     let count = manager.sinkCount;
 
     const sink = new ConsoleSink({});
-    manager.addSink(sink);
-    manager.removeSink(sink)
+    const sink2Name = "console sink 2";
+    const sink2 = new ConsoleSink({ name: sink2Name });
 
-    expect(manager.sinkCount).toBe(count);
+    manager.addSink(sink);
+    manager.addSink(sink2);
+    expect(manager.sinkCount).toBe(2);
+
+    manager.removeSink(sink);
+    expect(manager.sinkCount).toBe(1);
+
+    manager.removeSinkByName(sink2Name);
+    expect(manager.sinkCount).toBe(0);
   });
 
   it("can remove all sinks", () => {
