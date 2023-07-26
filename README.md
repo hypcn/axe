@@ -15,8 +15,9 @@ Includes multiple built-in log sinks, with a simple API for adding arbitrary log
 
 Includes fine-grained filtering of logs by log level
 
+- Set minimum log level in each logger instance
 - Set minimum log level handled by each log sink
-- Override settings for individual logger instances
+- Override sink filter settings for individual logger instances
 - Create separate manager instances with their own sinks for even more options
 
 # Installation
