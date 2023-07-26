@@ -31,7 +31,7 @@ export class NestLogger extends Logger {
     return this._manager.buildAndHandleLogMessage({
       level: level,
       context: ctx,
-      message: this.buildMessageString(msgBits),
+      message: this.buildMessageString(...msgBits),
     }, this.sinkFilter);
 
   }
