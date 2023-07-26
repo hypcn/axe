@@ -8,8 +8,10 @@ export type Class<T> = new (...args: any[]) => T;
 /** The name of the default console sink */
 export const CONSOLE_SINK = "Console";
 
-const isProd = process?.env.NODE_ENV?.toLowerCase() === "production" ||
-  process?.env.NODE_ENV?.toLowerCase() === "prod";
+const isProd = (process !== undefined)
+  ? (process?.env.NODE_ENV?.toLowerCase() === "production" ||
+    process?.env.NODE_ENV?.toLowerCase() === "prod")
+  : false;
 
 export class LogManager {
 
