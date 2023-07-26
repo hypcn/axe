@@ -1,6 +1,6 @@
 import { inspect } from "util";
-import { AxeManager, axeManager } from "./axe-manager";
-import { SimpleLogger } from "./interfaces";
+import { LogManager, logMgr } from "./log-manager";
+import { LogLevel, SimpleLogger } from "./interfaces";
 import { SinkFilter } from "./sink-filter";
 
 export class Logger implements SimpleLogger {
@@ -10,7 +10,7 @@ export class Logger implements SimpleLogger {
    * May be undefined if the logger has been destroyed or removed.
    * @internal
    */
-  _manager: AxeManager | undefined = axeManager;
+  _manager: LogManager | undefined = logMgr;
 
   /**
    * This logger's context.
@@ -19,6 +19,14 @@ export class Logger implements SimpleLogger {
   context: string | undefined;
 
   /**
+   * Filter messages based on level before they reach any log sinks
+   * @default undefined
+   */
+  logLevel: LogLevel | undefined;
+
+  /**
+   * Override the log filter levels defined in sinks for this logger instance.
+   * 
    * Map of sink names to minimum LogLevels required to use the sink.
    * If a filter level is not defined for a sink, the common sink filter level is used.
    */
@@ -30,6 +38,7 @@ export class Logger implements SimpleLogger {
 
   error(...msgs: any[]) {
     if (this._manager === undefined) return;
+    if (!this.levelSatisfiesLocalFilter("error")) return;
 
     return this._manager.buildAndHandleLogMessage({
       level: "error",
@@ -40,6 +49,7 @@ export class Logger implements SimpleLogger {
 
   warn(...msgs: any[]) {
     if (this._manager === undefined) return;
+    if (!this.levelSatisfiesLocalFilter("warn")) return;
 
     return this._manager.buildAndHandleLogMessage({
       level: "warn",
@@ -50,6 +60,7 @@ export class Logger implements SimpleLogger {
 
   log(...msgs: any[]) {
     if (this._manager === undefined) return;
+    if (!this.levelSatisfiesLocalFilter("log")) return;
 
     return this._manager.buildAndHandleLogMessage({
       level: "log",
@@ -60,6 +71,7 @@ export class Logger implements SimpleLogger {
 
   debug(...msgs: any[]) {
     if (this._manager === undefined) return;
+    if (!this.levelSatisfiesLocalFilter("debug")) return;
 
     return this._manager.buildAndHandleLogMessage({
       level: "debug",
@@ -70,12 +82,21 @@ export class Logger implements SimpleLogger {
 
   verbose(...msgs: any[]) {
     if (this._manager === undefined) return;
+    if (!this.levelSatisfiesLocalFilter("verbose")) return;
 
     return this._manager.buildAndHandleLogMessage({
       level: "verbose",
       context: this.context,
       message: this.buildMessageString(...msgs),
     }, this.sinkFilter);
+  }
+
+  private levelSatisfiesLocalFilter(level: LogLevel): boolean {
+
+    // If no filter, don't filter messages
+    if (!this.logLevel) return true;
+
+    return this._manager?.logLevelSatisfiesFilter(level, this.logLevel) ?? false;
   }
 
   private buildMessageString(...msgs: any[]): string {
