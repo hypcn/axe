@@ -255,4 +255,36 @@ describe("logger", () => {
     });
   });
 
+  it("does not have a default log level", () => {
+
+    const manager = new LogManager();
+    const logger = manager.createLogger();
+
+    expect(logger.logLevel).toBeUndefined();
+
+  });
+
+  it("applies the configured log level", () => {
+    return new Promise<void>((resolve, reject) => {
+
+      const manager = new LogManager();
+      manager.addSink({
+        name: "sink",
+        logFilter: LogLevels.verbose, // no sink filtering
+        destroy: () => { },
+        handleMessage: (msg) => {
+          expect(msg.level).toBe(LogLevels.log);
+          expect(msg.message).toBe("log");
+          resolve();
+        },
+      })
+
+      const logger = manager.createLogger();
+      logger.logLevel = LogLevels.log; // Logger filtering
+      logger.verbose("verbose");
+      logger.log("log");
+
+    });
+  });
+
 });
