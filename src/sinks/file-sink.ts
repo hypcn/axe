@@ -10,6 +10,9 @@ import { readdir, readFile, stat } from 'fs/promises';
 
 const DEBUG = false;
 
+// Guard against reference to `process` crashing browser builds when reading types in the browser
+const DEFAULT_LOG_PATH = (typeof window === "undefined") ? join(process.cwd(), "logs") : "./logs";
+
 export interface LogFileInfo {
   filename: string,
   /** In bytes */
@@ -25,7 +28,7 @@ export class FileSink implements LogSink {
   name: string = this.constructor.name;
   logFilter: LogLevel = LogLevels.log;
 
-  private logDirPath = join(process?.cwd() ?? "./", "logs");
+  private logDirPath = DEFAULT_LOG_PATH;
   private logFilenameFn: (() => string) = () => {
     const logDate = new Date().toISOString()
       .replace(/:/g, "-")
