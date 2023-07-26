@@ -8,8 +8,8 @@ export type Class<T> = new (...args: any[]) => T;
 /** The name of the default console sink */
 export const CONSOLE_SINK = "Console";
 
-const isProd = process.env.NODE_ENV?.toLowerCase() === "production" ||
-  process.env.NODE_ENV?.toLowerCase() === "prod";
+const isProd = process?.env.NODE_ENV?.toLowerCase() === "production" ||
+  process?.env.NODE_ENV?.toLowerCase() === "prod";
 
 export class LogManager {
 
@@ -23,7 +23,7 @@ export class LogManager {
   /** A device Name, common across logger instances */
   commonDeviceName: string | undefined;
   /** The process ID, common across logger instances */
-  commonProcessId: string = process.pid.toString();
+  commonProcessId: string = process?.pid.toString() ?? "";
 
   /**
    * List of Logger instances, to make them available for centralised sink and

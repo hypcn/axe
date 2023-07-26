@@ -25,7 +25,7 @@ export class FileSink implements LogSink {
   name: string = this.constructor.name;
   logFilter: LogLevel = LogLevels.log;
 
-  private logDirPath = join(process.cwd(), "logs");
+  private logDirPath = join(process?.cwd() ?? "./", "logs");
   private logFilenameFn: (() => string) = () => {
     const logDate = new Date().toISOString()
       .replace(/:/g, "-")
