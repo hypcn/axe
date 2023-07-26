@@ -1,4 +1,4 @@
-import { LogLevel, LogLevelNumbers } from "./interfaces/log-level.interface";
+import { LogLevel, LogLevelNumber } from "./interfaces/log-level.interface";
 
 /**
  * Define log sink filters by log level, to control which messages can be
@@ -18,7 +18,7 @@ export class SinkFilter {
     if (!a && !b) return undefined;
     if (a && !b) return a;
     if (!a && b) return b;
-    return (LogLevelNumbers[a!] <= LogLevelNumbers[b!]) ? a : b;
+    return (LogLevelNumber[a!] <= LogLevelNumber[b!]) ? a : b;
   }
 
   /**

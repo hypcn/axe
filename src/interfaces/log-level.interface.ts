@@ -10,7 +10,7 @@ export const LogLevels = {
 } as const;
 
 /** Log levels as numbers of importance comparison */
-export const LogLevelNumbers = {
+export const LogLevelNumber = {
   [LogLevels.none]: -1,
   [LogLevels.error]: 0,
   [LogLevels.warn]: 1,
