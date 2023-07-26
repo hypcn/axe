@@ -34,7 +34,7 @@ Includes type definitions.
 Example Typescript usage:
 
 ```typescript
-import { axeManager, ConsoleSink, CONSOLE_SINK, LogLevels, Logger, AxeManager } from "@hypericon/axe";
+import { logMgr, ConsoleSink, CONSOLE_SINK, LogLevels, Logger, LogManager } from "@hypericon/axe";
 
 const logger = new Logger("MyLogger");
 
@@ -50,33 +50,33 @@ anotherLogger.log("This logger has the context 'Another Logger'");
 // Update the log level filter for the default console sink.
 // Sinks are identified by their unique "name", the default console sink's name is exported
 // from the package.
-axeManager.setSinkFilter(CONSOLE_SINK, LogLevels.verbose);
-axeManager.setSinkFilter("Console", "verbose"); // <- this is equivalent, but less robust to change
+logMgr.setSinkFilter(CONSOLE_SINK, LogLevels.verbose);
+logMgr.setSinkFilter("Console", "verbose"); // <- this is equivalent, but less robust to change
 logger.verbose("verbose logs are ignored by default, but this is displayed.");
 
 // Additional sinks can be added.
 // (there is no good reason to have two console sinks, this is just an example)
 const newConsoleSink = "Console2";
-axeManager.addSink(new ConsoleSink({
+logMgr.addSink(new ConsoleSink({
   name: newConsoleSink,
   logLevel: LogLevels.log,
 }));
 
 // Separate sinks can have different log filters:
-axeManager.setSinkFilter(newConsoleSink, LogLevels.warn);
+logMgr.setSinkFilter(newConsoleSink, LogLevels.warn);
 // The current sink  log level filters can be read:
-axeManager.readSinkFilters(); // { 'Console': 'verbose', 'Console2': 'warn' }
+logMgr.readSinkFilters(); // { 'Console': 'verbose', 'Console2': 'warn' }
 // This is useful for editing which log levels are logged where at runtime
 
 // Separate manager instances can be created,
 // with their own separate sink instances and log level filters
-const newManager = new AxeManager({ withDefaultConsoleSink: true });
+const newManager = new LogManager({ withDefaultConsoleSink: true });
 const logger2 = newManager.newLogger("Logger 2");
-logger2.log("This logger's manager 'newManager' is separate from 'axeManager' above.");
+logger2.log("This logger's manager 'newManager' is separate from 'logMgr' above.");
 logger2.log("This allows them to configure their sinks and common filters separately.");
 
-// Note: the "axeManager" import from the package is simply a prebuilt instance of
-// `AxeManager` with the default console sink.
+// Note: the "logMgr" import from the package is simply a prebuilt instance of
+// `LogManager` with the default console sink.
 ```
 
 # Usage
@@ -133,58 +133,58 @@ logger.sinkFilter.remove(sinkName: string): void;
 logger.sinkFilter.clear(): void;
 ```
 
-## AxeManager
+## LogManager
 
-`AxeManager` stores instances of `Logger` and `LogSink`, and handles formatting and filtering logged messages.
+`LogManager` stores instances of `Logger` and `LogSink`, and handles formatting and filtering logged messages.
 
-Every `Logger` is associated with one `AxeManager`.
+Every `Logger` is associated with one `LogManager`.
 
-A default instance named `axeManager` is exported from the library. `Logger`s created using the `new Logger(...)` constructor are associated with this instance.
+A default instance named `logMgr` is exported from the library. `Logger`s created using the `new Logger(...)` constructor are associated with this instance.
 
 ```typescript
-import { axeManager, AxeManager, LogSink } from "@hypericon/axe";
+import { logMgr, LogManager, LogSink } from "@hypericon/axe";
 
-// `axeManager` is the default `AxeManager` instance.
-const logger1 = new Logger("1"); // manager -> `axeManager`
+// `logMgr` is the default `LogManager` instance.
+const logger1 = new Logger("1"); // manager -> `logMgr`
 
 // Create a separate manager instance
-const anotherManager = new AxeManager();
+const anotherManager = new LogManager();
 const logger2 = anotherManager.createLogger("2"); // manager -> `anotherManager`
 
 // Alternatively, create a Logger with the default manager, then move it to another manager
 const logger3 = new Logger("3");
-anotherManager.addLogger(logger3); // moves the logger from the default `axeManager` to the new manager
+anotherManager.addLogger(logger3); // moves the logger from the default `logMgr` to the new manager
 
-// `LogSink`s are managed in `AxeManager` instances separately
-axeManager.addSink(...);
+// `LogSink`s are managed in `LogManager` instances separately
+logMgr.addSink(...);
 anotherManager.addSink(...);
 
 // Find, add, and remove `LogSink`s and filters
-axeManager.findSinkByName(name: string): LogSink | undefined;
-axeManager.findSink<T extends LogSink>(sinkClass: Class<T>): T | undefined;
-axeManager.addSink(sink: LogSink): void;
-axeManager.removeSinkByName(name: string): void;
-axeManager.removeSink(sink: LogSink): void;
-axeManager.removeAllSinks(): void;
+logMgr.findSinkByName(name: string): LogSink | undefined;
+logMgr.findSink<T extends LogSink>(sinkClass: Class<T>): T | undefined;
+logMgr.addSink(sink: LogSink): void;
+logMgr.removeSinkByName(name: string): void;
+logMgr.removeSink(sink: LogSink): void;
+logMgr.removeAllSinks(): void;
 
-axeManager.readSinkFilters(): { [name: string]: LogLevel };
-axeManager.setSinkFilter(sinkName: string, logLevel: LogLevel): void;
+logMgr.readSinkFilters(): { [name: string]: LogLevel };
+logMgr.setSinkFilter(sinkName: string, logLevel: LogLevel): void;
 ```
 
 ## LogSink
 
 `LogSink` is an interface which all sinks implement.
 
-To make a custom sink, implement the interface then add the object to an AxeManager.
+To make a custom sink, implement the interface then add the object to a LogManager.
 
 ```typescript
-import { LogSink, axeManager, Logger, LogLevels } from "@hypericon/axe";
+import { LogSink, logMgr, Logger, LogLevels } from "@hypericon/axe";
 
 // LogSink is defined like this:
 interface LogSink {
   /**
    * The unique name of the sink.
-   * The name only needs to be unique with a single manager.
+   * The name only needs to be unique within a single manager.
    */
   name: string,
   /**
@@ -201,11 +201,12 @@ interface LogSink {
   handleMessage(logMessage: LogMessage): any,
   /**
    * Gracefully destroy the sink. It cannot be used again.
+   * (Method may be empty depending on the sink implementation)
    */
   destroy(): any,
 }
 
-// Create a custom sink, and register it with the default manager after removing the default sink:
+// Create a custom sink, and register it with the default manager after removing the default console sink:
 
 class MySink implements LogSink {
   name: "MySink",
@@ -223,8 +224,8 @@ class MySink implements LogSink {
   }
 }
 
-axeManager.removeAllSinks();
-axeManager.addSink(new MySink({ /* ... */ }));
+logMgr.removeAllSinks();
+logMgr.addSink(new MySink({ /* ... */ }));
 
 const logger = new Logger("Context");
 logger.log("A message");
@@ -234,15 +235,15 @@ logger.log("A message");
 
 Log messages to the console.
 
-A single `ConsoleSink` is included by in the default `axeManager` instance exported from the library.
+A single `ConsoleSink` is included by in the default `logMgr` instance exported from the library.
 
 Example:
 
 ```typescript
-import { Logger, axeManager, LogLevels, ConsoleSink } from "@hypericon/axe";
+import { Logger, logMgr, LogLevels, ConsoleSink } from "@hypericon/axe";
 
-axeManager.removeAllSinks();
-axeManager.addSink(new ConsoleSink({
+logMgr.removeAllSinks();
+logMgr.addSink(new ConsoleSink({
   name: "ConsoleSink",
   logLevel: LogLevels.log,
 }));
@@ -258,9 +259,9 @@ Log messages to a file.
 Example:
 
 ```typescript
-import { Logger, axeManager, LogLevels, FileSink } from "@hypericon/axe";
+import { Logger, logMgr, LogLevels, FileSink } from "@hypericon/axe";
 
-axeManager.removeAllSinks();
+logMgr.removeAllSinks();
 const sink = new FileSink({
   name: "FileSink",
   logLevel: LogLevels.log,
@@ -285,7 +286,7 @@ const sink = new FileSink({
    */
   logFilenameFn?: () => string,
 });
-axeManager.addSink(sink);
+logMgr.addSink(sink);
 
 const logger = new Logger("Example");
 logger.log("A message logged to a file");
@@ -313,10 +314,10 @@ Log messages to [Hypertable](https://hypertable.co.uk). For each new message, a 
 Example:
 
 ```typescript
-import { Logger, axeManager, LogLevels, HypertableSink } from "@hypericon/axe";
+import { Logger, logMgr, LogLevels, HypertableSink } from "@hypericon/axe";
 
-axeManager.removeAllSinks();
-axeManager.addSink(new HypertableSink({
+logMgr.removeAllSinks();
+logMgr.addSink(new HypertableSink({
   name: "HypertableSink",
   logLevel: LogLevels.log,
 
@@ -345,14 +346,14 @@ Log messages to an [RxJS](https://github.com/ReactiveX/rxjs) observable, so they
 Example:
 
 ```typescript
-import { Logger, axeManager, LogLevels, ObservableSink } from "@hypericon/axe";
+import { Logger, logMgr, LogLevels, ObservableSink } from "@hypericon/axe";
 
-axeManager.removeAllSinks();
+logMgr.removeAllSinks();
 const sink = new ObservableSink({
   name: "ObservableSink",
   logLevel: LogLevels.log,
 });
-axeManager.addSink(sink);
+logMgr.addSink(sink);
 
 // This would be consumed by the application after the desired log messages had been aggregated
 sink.logMessage$.subscribe(msg => {
@@ -370,10 +371,10 @@ Log messages to a webhook.
 Example:
 
 ```typescript
-import { Logger, axeManager, LogLevels, WebhookSink } from "@hypericon/axe";
+import { Logger, logMgr, LogLevels, WebhookSink } from "@hypericon/axe";
 
-axeManager.removeAllSinks();
-axeManager.addSink(new WebhookSink({
+logMgr.removeAllSinks();
+logMgr.addSink(new WebhookSink({
   name: "WebhookSink",
   logLevel: LogLevels.warn,
 

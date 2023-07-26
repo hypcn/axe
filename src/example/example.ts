@@ -1,4 +1,4 @@
-import { axeManager, ConsoleSink, CONSOLE_SINK, LogLevels, Logger, AxeManager } from "..";
+import { logMgr, ConsoleSink, CONSOLE_SINK, LogLevels, Logger, LogManager } from "..";
 
 function exampleUsage() {
 
@@ -16,7 +16,7 @@ function exampleUsage() {
   filterLogger.log("By default, only 'debug' logs and above are handled, so:");
   filterLogger.verbose("this verbose log is *not* displayed");
   filterLogger.log("But if the filter is set to 'verbose' for the default console sink:");
-  axeManager.setSinkFilter(CONSOLE_SINK, LogLevels.verbose);
+  logMgr.setSinkFilter(CONSOLE_SINK, LogLevels.verbose);
   // axeManager.findSink(ConsoleSink)?.logLevel = LogLevels.verbose;
   filterLogger.verbose("then this second verbose log *is* displayed", "\n");
 
@@ -25,21 +25,21 @@ function exampleUsage() {
   sinkLogger.log("More sinks may be added.");
   sinkLogger.log("Adding another console sink, only logging warnings and errors:");
   sinkLogger.debug("(Normally you wouldn't use two console sinks, but this is an example)");
-  axeManager.addSink(new ConsoleSink({
+  logMgr.addSink(new ConsoleSink({
     name: otherConsoleName,
     logFilter: LogLevels.warn,
   }));
   sinkLogger.warn("this warning is logged twice");
   sinkLogger.log("but this log is only logged once, as the second sink ignores it.", "\n");
 
-  sinkLogger.log("The current sink filters are:", axeManager.readSinkFilters());
+  sinkLogger.log("The current sink filters are:", logMgr.readSinkFilters());
   sinkLogger.log("If the filter for the second sink is set to 'error':");
-  axeManager.setSinkFilter(otherConsoleName, "error");
+  logMgr.setSinkFilter(otherConsoleName, "error");
   sinkLogger.warn("then this warning is only displayed once.", "\n");
 
   sinkLogger.log("Adding a sink with the same name throws an error:");
   try {
-    axeManager.addSink(new ConsoleSink({
+    logMgr.addSink(new ConsoleSink({
       name: otherConsoleName,
       logFilter: LogLevels.warn,
     }));
@@ -49,12 +49,12 @@ function exampleUsage() {
   }
 
   sinkLogger.log("After removing the other console sink:");
-  axeManager.removeSinkByName(otherConsoleName);
-  sinkLogger.log("there is only one sink filter remaining:", axeManager.readSinkFilters(), "\n");
+  logMgr.removeSinkByName(otherConsoleName);
+  sinkLogger.log("there is only one sink filter remaining:", logMgr.readSinkFilters(), "\n");
   
   logger.log("Separate manager instances can be instantiated:");
 
-  const axeManager2 = new AxeManager({ withDefaultConsoleSink: true });
+  const axeManager2 = new LogManager({ withDefaultConsoleSink: true });
   const newMgrLogger = axeManager2.createLogger("New Manager");
   newMgrLogger.log("...so this logger does not share any settings with the other two.");
   newMgrLogger.log("For example, if this manager is set to only log errors:");

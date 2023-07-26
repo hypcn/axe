@@ -1,5 +1,5 @@
 
-export * from "./axe-manager";
+export * from "./log-manager";
 export * from "./logger";
 export * from "./sink-filter";
 

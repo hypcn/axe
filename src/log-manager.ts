@@ -1,4 +1,4 @@
-import { LogLevel, LogLevelNumbers, LogLevels, LogMessage, LogSink } from "./interfaces";
+import { LogLevel, LogLevelNumber, LogLevels, LogMessage, LogSink } from "./interfaces";
 import { SinkFilter } from "./sink-filter";
 import { Logger } from "./logger";
 import { ConsoleSink } from "./sinks";
@@ -10,13 +10,18 @@ export const CONSOLE_SINK = "Console";
 
 const isProd = process.env.NODE_ENV === "production";
 
-export class AxeManager {
+export class LogManager {
 
+  /** A default logger "context" if one is not configured, common across logger instances */
   commonContext: string = "";
+  /** A default log level if one is not configured, common across logger instances */
   commonLogLevel: LogLevel = LogLevels.log;
 
+  /** A device ID, common across logger instances */
   commonDeviceId: string | undefined;
+  /** A device Name, common across logger instances */
   commonDeviceName: string | undefined;
+  /** The process ID, common across logger instances */
   commonProcessId: string = process.pid.toString();
 
   /**
@@ -35,7 +40,7 @@ export class AxeManager {
     if (options?.withDefaultConsoleSink) {
       this.addSink(new ConsoleSink({
         name: CONSOLE_SINK,
-        logFilter: isProd ? LogLevels.debug : LogLevels.log,
+        logFilter: isProd ? LogLevels.log : LogLevels.verbose,
         noColour: isProd,
       }));
     }
@@ -76,14 +81,29 @@ export class AxeManager {
 
   // ===== Log Sinks
 
+  /**
+   * Find the log sink with the given name (if it exists)
+   * @param name 
+   * @returns 
+   */
   findSinkByName(name: string): LogSink | undefined {
     return this.sinks.find(s => s.name === name);
   }
 
+  /**
+   * Find  the first log sink of the given class
+   * @param sinkClass 
+   * @returns 
+   */
   findSink<T extends LogSink>(sinkClass: Class<T>): T | undefined {
     return this.sinks.find(s => s.constructor === sinkClass) as T | undefined;
   }
 
+  /**
+   * Add a new log sink to the manager
+   * @param sink 
+   * @throws if the name is already in use
+   */
   addSink(sink: LogSink) {
     const existingName = this.findSinkByName(sink.name);
     if (existingName) {
@@ -120,6 +140,10 @@ export class AxeManager {
     }
   }
 
+  /**
+   * Read the configured log level filters of all the configured log sinks
+   * @returns 
+   */
   readSinkFilters(): { [name: string]: LogLevel } {
     const sinkLogFilters: { [name: string]: LogLevel } = {};
     for (const sink of this.sinks) {
@@ -128,6 +152,11 @@ export class AxeManager {
     return sinkLogFilters;
   }
 
+  /**
+   * Set the log level filter of the sink with the given name
+   * @param sinkName 
+   * @param logLevel 
+   */
   setSinkFilter(sinkName: string, logLevel: LogLevel) {
     const sink = this.findSinkByName(sinkName);
     if (sink) sink.logFilter = logLevel;
@@ -135,6 +164,11 @@ export class AxeManager {
 
   // ===== Handle Log Messages
 
+  /**
+   * Builds a complete LogMessage from a partial message, falling back on common default values
+   * @param partalMsg 
+   * @returns 
+   */
   buildLogMessage(partalMsg: Partial<LogMessage>): LogMessage {
 
     return {
@@ -150,6 +184,11 @@ export class AxeManager {
 
   }
 
+  /**
+   * Pass a given message to all the log sinks which have filter settings accepting the log message
+   * @param message 
+   * @param sinkFilter 
+   */
   handleLogMessage(message: LogMessage, sinkFilter?: SinkFilter) {
 
     for (const sink of this.sinks) {
@@ -160,12 +199,19 @@ export class AxeManager {
 
   }
 
+  /**
+   * Build a complete log message from a partial message, and pass it to all
+   * log sinks which are "interested" in the message
+   * @param partialMsg 
+   * @param sinkFilter 
+   * @returns 
+   */
   buildAndHandleLogMessage(partialMsg: Partial<LogMessage>, sinkFilter?: SinkFilter) {
     return this.handleLogMessage(this.buildLogMessage(partialMsg), sinkFilter);
   }
 
   /**
-   * 
+   * Determine if a given log level satisfies a log level filter
    * @param logLevel 
    * @param filterLevel 
    * @returns 
@@ -174,7 +220,7 @@ export class AxeManager {
     // "none" never satisfies anything, nor can it be satisfied
     if (logLevel === LogLevels.none || filterLevel === LogLevels.none) return false;
 
-    return LogLevelNumbers[logLevel] <= LogLevelNumbers[filterLevel];
+    return LogLevelNumber[logLevel] <= LogLevelNumber[filterLevel];
   }
 
 }
@@ -182,4 +228,4 @@ export class AxeManager {
 /**
  * The default instance of the manager
  */
-export const axeManager = new AxeManager({ withDefaultConsoleSink: true });
+export const logMgr = new LogManager({ withDefaultConsoleSink: true });

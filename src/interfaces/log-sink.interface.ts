@@ -5,7 +5,7 @@ export interface LogSink {
 
   /**
    * The unique name of the sink.
-   * The name only needs to be unique with a single manager.
+   * The name only needs to be unique within a single manager.
    */
   name: string,
 
@@ -25,6 +25,7 @@ export interface LogSink {
 
   /**
    * Gracefully destroy the sink. It cannot be used again.
+   * (Method may be empty depending on the sink implementation)
    */
   destroy(): any,
   
