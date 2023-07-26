@@ -8,7 +8,7 @@ export type Class<T> = new (...args: any[]) => T;
 /** The name of the default console sink */
 export const CONSOLE_SINK = "Console";
 
-const isProd = (process !== undefined)
+const isProd = (typeof window === "undefined" && process !== undefined)
   ? (process?.env.NODE_ENV?.toLowerCase() === "production" ||
     process?.env.NODE_ENV?.toLowerCase() === "prod")
   : false;
