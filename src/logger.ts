@@ -91,7 +91,7 @@ export class Logger implements SimpleLogger {
     }, this.sinkFilter);
   }
 
-  private levelSatisfiesLocalFilter(level: LogLevel): boolean {
+  protected levelSatisfiesLocalFilter(level: LogLevel): boolean {
 
     // If no filter, don't filter messages
     if (!this.logLevel) return true;
@@ -99,7 +99,7 @@ export class Logger implements SimpleLogger {
     return this._manager?.logLevelSatisfiesFilter(level, this.logLevel) ?? false;
   }
 
-  private buildMessageString(...msgs: any[]): string {
+  protected buildMessageString(...msgs: any[]): string {
 
     // console.log("build message string from:", msgs);
     if (msgs.length === 0) return "";
