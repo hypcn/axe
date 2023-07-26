@@ -1,4 +1,4 @@
-import { AxeManager, LogLevels, Logger } from "../src";
+import { LogManager, LogLevels, Logger } from "../src";
 
 describe("logger", () => {
 
@@ -15,7 +15,7 @@ describe("logger", () => {
   it("can log errors", () => {
     return new Promise<void>((resolve, reject) => {
 
-      const manager = new AxeManager();
+      const manager = new LogManager();
       manager.addSink({
         name: "sink",
         logFilter: LogLevels.log,
@@ -36,7 +36,7 @@ describe("logger", () => {
   it("can log warnings", () => {
     return new Promise<void>((resolve, reject) => {
 
-      const manager = new AxeManager();
+      const manager = new LogManager();
       manager.addSink({
         name: "sink",
         logFilter: LogLevels.log,
@@ -57,7 +57,7 @@ describe("logger", () => {
   it("can filter out warnings", () => {
     return new Promise<void>((resolve, reject) => {
 
-      const manager = new AxeManager();
+      const manager = new LogManager();
       manager.addSink({
         name: "sink",
         logFilter: LogLevels.error,
@@ -79,7 +79,7 @@ describe("logger", () => {
   it("can log log messages", () => {
     return new Promise<void>((resolve, reject) => {
 
-      const manager = new AxeManager();
+      const manager = new LogManager();
       manager.addSink({
         name: "sink",
         logFilter: LogLevels.log,
@@ -100,7 +100,7 @@ describe("logger", () => {
   it("can filter out log messages", () => {
     return new Promise<void>((resolve, reject) => {
 
-      const manager = new AxeManager();
+      const manager = new LogManager();
       manager.addSink({
         name: "sink",
         logFilter: LogLevels.error,
@@ -122,7 +122,7 @@ describe("logger", () => {
   it("can log debug messages", () => {
     return new Promise<void>((resolve, reject) => {
 
-      const manager = new AxeManager();
+      const manager = new LogManager();
       manager.addSink({
         name: "sink",
         logFilter: LogLevels.debug,
@@ -143,7 +143,7 @@ describe("logger", () => {
   it("can filter out debug messages", () => {
     return new Promise<void>((resolve, reject) => {
 
-      const manager = new AxeManager();
+      const manager = new LogManager();
       manager.addSink({
         name: "sink",
         logFilter: LogLevels.error,
@@ -165,7 +165,7 @@ describe("logger", () => {
   it("can log verbose messages", () => {
     return new Promise<void>((resolve, reject) => {
 
-      const manager = new AxeManager();
+      const manager = new LogManager();
       manager.addSink({
         name: "sink",
         logFilter: LogLevels.verbose,
@@ -186,7 +186,7 @@ describe("logger", () => {
   it("can filter out verbose messages", () => {
     return new Promise<void>((resolve, reject) => {
 
-      const manager = new AxeManager();
+      const manager = new LogManager();
       manager.addSink({
         name: "sink",
         logFilter: LogLevels.error,
@@ -208,7 +208,7 @@ describe("logger", () => {
   it("can build message strings", () => {
     return new Promise<void>((resolve, reject) => {
 
-      const manager = new AxeManager();
+      const manager = new LogManager();
       manager.addSink({
         name: "sink",
         logFilter: LogLevels.log,
@@ -232,7 +232,7 @@ describe("logger", () => {
   it("can override sink log filters", () => {
     return new Promise<void>((resolve, reject) => {
 
-      const manager = new AxeManager();
+      const manager = new LogManager();
       const sinkName = "sink";
 
       manager.addSink({

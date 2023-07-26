@@ -1,43 +1,43 @@
-import { axeManager, AxeManager, CONSOLE_SINK, ConsoleSink, Logger, LogLevels, LogMessage } from "../src";
+import { logMgr, LogManager, CONSOLE_SINK, ConsoleSink, Logger, LogLevels, LogMessage } from "../src";
 
 describe("manager", () => {
 
   it("exports a default instance", () => {
-    expect(axeManager).toBeDefined();
+    expect(logMgr).toBeDefined();
   });
 
   it("has a ConsoleSink on the default manager instance", () => {
-    expect(axeManager.findSink(ConsoleSink)).toBeDefined();
+    expect(logMgr.findSink(ConsoleSink)).toBeDefined();
   });
 
   it("can be created", () => {
-    const manager = new AxeManager({});
+    const manager = new LogManager({});
     expect(manager).toBeDefined();
   });
 
   it("can be created with a default ConsoleSink", () => {
-    const manager = new AxeManager({
+    const manager = new LogManager({
       withDefaultConsoleSink: true,
     });
     expect(manager.findSink(ConsoleSink)).toBeDefined();
   });
 
   it("has the correct default name for the default ConsoleSink", () => {
-    const manager = new AxeManager({
+    const manager = new LogManager({
       withDefaultConsoleSink: true,
     });
     expect(manager.findSink(ConsoleSink)!.name).toBe(CONSOLE_SINK);
   });
 
   it("can create a logger", () => {
-    const manager = new AxeManager();
+    const manager = new LogManager();
     let count = manager.loggerCount;
     manager.createLogger();
     expect(manager.loggerCount).toBe(count + 1);
   });
 
   it("can add an existing logger", () => {
-    const manager = new AxeManager();
+    const manager = new LogManager();
     let count = manager.loggerCount;
 
     const logger = new Logger();
@@ -48,7 +48,7 @@ describe("manager", () => {
   });
 
   it("can remove a logger", () => {
-    const manager = new AxeManager();
+    const manager = new LogManager();
     let count = manager.loggerCount;
 
     const logger = new Logger();
@@ -61,7 +61,7 @@ describe("manager", () => {
   });
 
   it("can add a sink", () => {
-    const manager = new AxeManager();
+    const manager = new LogManager();
     let count = manager.sinkCount;
 
     const sink = new ConsoleSink({});
@@ -72,7 +72,7 @@ describe("manager", () => {
   });
 
   it("can remove sinks", () => {
-    const manager = new AxeManager();
+    const manager = new LogManager();
     let count = manager.sinkCount;
 
     const sink = new ConsoleSink({});
@@ -91,7 +91,7 @@ describe("manager", () => {
   });
 
   it("can remove all sinks", () => {
-    const manager = new AxeManager();
+    const manager = new LogManager();
 
     const sink1 = new ConsoleSink({ name: "1" });
     const sink2 = new ConsoleSink({ name: "2" });
@@ -106,7 +106,7 @@ describe("manager", () => {
   });
 
   it("can find a sink", () => {
-    const manager = new AxeManager();
+    const manager = new LogManager();
 
     const sink1 = new ConsoleSink({ name: "1" });
     const sink2 = new ConsoleSink({ name: "2" });
@@ -120,7 +120,7 @@ describe("manager", () => {
   });
 
   it("can set a sink filter", () => {
-    const manager = new AxeManager();
+    const manager = new LogManager();
 
     const name = "sink";
     const sink = new ConsoleSink({ name });
@@ -132,7 +132,7 @@ describe("manager", () => {
   });
 
   it("can set a sink filter", () => {
-    const manager = new AxeManager();
+    const manager = new LogManager();
 
     const sink1 = new ConsoleSink({ name: "one" });
     const sink2 = new ConsoleSink({ name: "two" });
@@ -148,7 +148,7 @@ describe("manager", () => {
   });
 
   it("can build log messages", () => {
-    const manager = new AxeManager();
+    const manager = new LogManager();
 
     const msg1 = manager.buildLogMessage({});
     expect(msg1.context).toBe(manager.commonContext);
@@ -180,7 +180,7 @@ describe("manager", () => {
   });
 
   it("can handle log messages", () => {
-    const manager = new AxeManager();
+    const manager = new LogManager();
 
     return new Promise<void>((resolve, reject) => {
 
@@ -207,7 +207,7 @@ describe("manager", () => {
   });
 
   it("can build and handle log messages", () => {
-    const manager = new AxeManager();
+    const manager = new LogManager();
 
     return new Promise<void>((resolve, reject) => {
 
@@ -235,7 +235,7 @@ describe("manager", () => {
   });
 
   it("can determine if a log level satisfies a filter", () => {
-    const manager = new AxeManager();
+    const manager = new LogManager();
 
     expect(manager.logLevelSatisfiesFilter(LogLevels.log, LogLevels.log)).toBe(true);
     expect(manager.logLevelSatisfiesFilter(LogLevels.log, LogLevels.debug)).toBe(true);
