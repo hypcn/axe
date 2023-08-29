@@ -396,3 +396,28 @@ logMgr.addSink(new WebhookSink({
 const logger = new Logger("Example");
 logger.warn("A warning logged to the webhook");
 ```
+
+## Custom Loggers
+
+Some additional classes extending `Logger` are included for easy integration with certain platforms and frameworks.
+
+### NestLogger
+
+For use with [NestJS](https://nestjs.com/)
+
+In `main.ts`:
+
+```ts
+import { NestLogger } from '@hypericon/axe';
+
+async function bootstrap() {
+
+  const logger = new NestLogger();
+  const app = await NestFactory.create(AppModule, { logger });
+
+  // ... server setup omitted ...
+
+  await app.listen(3000);
+}
+bootstrap();
+```
