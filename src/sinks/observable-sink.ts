@@ -4,7 +4,7 @@ import { LogLevel, LogLevels, LogMessage, LogSink } from "../interfaces";
 export class ObservableSink implements LogSink {
 
   name: string = this.constructor.name;
-  logFilter: LogLevel = LogLevels.debug;
+  minLevel: LogLevel = LogLevels.debug;
 
   private _logMessage = new Subject<LogMessage>();
   public logMessage$ = this._logMessage.asObservable();
@@ -13,12 +13,12 @@ export class ObservableSink implements LogSink {
 
   constructor(settings: {
     name?: string,
-    logFilter?: LogLevel,
+    minLevel?: LogLevel,
     /** Optional error handler */
     onError?: (error: Error) => void,
   }) {
     if (settings.name) this.name = settings.name;
-    if (settings.logFilter) this.logFilter = settings.logFilter;
+    if (settings.minLevel) this.minLevel = settings.minLevel;
     this.onError = settings.onError;
   }
 

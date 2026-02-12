@@ -119,29 +119,29 @@ describe("manager", () => {
     expect(manager.findSinkByName("2")).toBe(sink2);
   });
 
-  it("can set a sink filter", () => {
+  it("can set a sink min level", () => {
     const manager = new LogManager();
 
     const name = "sink";
     const sink = new ConsoleSink({ name });
     manager.addSink(sink);
     const level = LogLevels.error;
-    manager.setSinkFilter(name, level);
+    manager.setSinkMinLevel(name, level);
 
-    expect(sink.logFilter).toBe(level);
+    expect(sink.minLevel).toBe(level);
   });
 
-  it("can set a sink filter", () => {
+  it("can read sink min levels", () => {
     const manager = new LogManager();
 
     const sink1 = new ConsoleSink({ name: "one" });
     const sink2 = new ConsoleSink({ name: "two" });
     manager.addSink(sink1);
     manager.addSink(sink2);
-    sink1.logFilter = LogLevels.verbose;
-    sink2.logFilter = LogLevels.warn;
+    sink1.minLevel = LogLevels.verbose;
+    sink2.minLevel = LogLevels.warn;
 
-    expect(manager.readSinkFilters()).toMatchObject({
+    expect(manager.readSinkMinLevels()).toMatchObject({
       one: LogLevels.verbose,
       two: LogLevels.warn,
     });
@@ -193,7 +193,7 @@ describe("manager", () => {
 
       manager.addSink({
         name: "sink",
-        logFilter: LogLevels.log,
+        minLevel: LogLevels.log,
         handleMessage: (msg) => {
           expect(message).toBe(msg);
           resolve();
@@ -213,7 +213,7 @@ describe("manager", () => {
 
       manager.addSink({
         name: "sink",
-        logFilter: LogLevels.log,
+        minLevel: LogLevels.log,
         handleMessage: (msg) => {
           expect(msg.context).toBe(manager.commonContext);
           expect(msg.deviceId).toBe(manager.commonDeviceId);

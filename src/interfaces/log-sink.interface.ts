@@ -10,12 +10,10 @@ export interface LogSink {
   name: string,
 
   /**
-   * The default minimum log level that a received message must have for it to be handled.
+   * The minimum log level that a received message must have for it to be handled.
    * If the log level of a received message is lower than this, the message is ignored.
-   * 
-   * This can be overridden by individual logger instances.
    */
-  logFilter: LogLevel,
+  minLevel: LogLevel,
 
   /**
    * Handle a logged message. The message does not need to be filtered again.

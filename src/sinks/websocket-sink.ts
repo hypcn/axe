@@ -16,7 +16,7 @@ type WebSocketLike = {
 export class WebsocketSink implements LogSink {
 
   name: string = this.constructor.name;
-  logFilter: LogLevel = LogLevels.warn;
+  minLevel: LogLevel = LogLevels.warn;
 
   private url: string;
   private ws: WebSocketLike | undefined;
@@ -29,7 +29,7 @@ export class WebsocketSink implements LogSink {
 
   constructor(settings: {
     name?: string,
-    logFilter?: LogLevel,
+    minLevel?: LogLevel,
 
     /** The WebSocket URL to connect to (ws:// or wss://) */
     url: string,
@@ -43,7 +43,7 @@ export class WebsocketSink implements LogSink {
     onError?: (error: Error) => void,
   }) {
     if (settings.name) this.name = settings.name;
-    if (settings.logFilter) this.logFilter = settings.logFilter;
+    if (settings.minLevel) this.minLevel = settings.minLevel;
 
     this.url = settings.url;
     this.buildMessage = settings.buildMessage ?? this.defaultBuildMessage;

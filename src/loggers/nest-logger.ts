@@ -32,7 +32,7 @@ export class NestLogger extends Logger {
       level: level,
       context: ctx,
       message: this.buildMessageString(...msgBits),
-    }, this.sinkFilter);
+    });
 
   }
 

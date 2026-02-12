@@ -39,25 +39,25 @@ describe("file sink", () => {
 
   it("has a default log filter", () => {
     const sink = new FileSink({ logDirPath: testLogDirPath });
-    expect(sink.logFilter).toBeDefined();
+    expect(sink.minLevel).toBeDefined();
     sink.destroy();
   });
 
   it("can have a custom log filter", () => {
-    const logFilter = LogLevels.error;
+    const minLevel = LogLevels.error;
     const sink = new FileSink({
-      logFilter,
+      minLevel,
       logDirPath: testLogDirPath,
     });
-    expect(sink.logFilter).toBe(logFilter);
+    expect(sink.minLevel).toBe(minLevel);
     sink.destroy();
   });
 
   it("can change log filter", () => {
-    const logFilter = LogLevels.error;
+    const minLevel = LogLevels.error;
     const sink = new FileSink({ logDirPath: testLogDirPath });
-    sink.logFilter = logFilter;
-    expect(sink.logFilter).toBe(logFilter);
+    sink.minLevel = minLevel;
+    expect(sink.minLevel).toBe(minLevel);
     sink.destroy();
   });
 

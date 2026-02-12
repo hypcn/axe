@@ -1,5 +1,4 @@
 import { LogLevel, LogLevelNumber, LogLevels, LogMessage, LogSink } from "./interfaces";
-import { SinkFilter } from "./sink-filter";
 import { Logger } from "./logger";
 import { ConsoleSink } from "./sinks";
 
@@ -44,7 +43,7 @@ export class LogManager {
     if (options?.withDefaultConsoleSink) {
       this.addSink(new ConsoleSink({
         name: CONSOLE_SINK,
-        logFilter: isProd ? LogLevels.log : LogLevels.verbose,
+        minLevel: isProd ? LogLevels.log : LogLevels.verbose,
         noColour: isProd,
       }));
     }
@@ -145,25 +144,25 @@ export class LogManager {
   }
 
   /**
-   * Read the configured log level filters of all the configured log sinks
+   * Read the configured minimum log levels of all the configured log sinks
    * @returns 
    */
-  readSinkFilters(): { [name: string]: LogLevel } {
-    const sinkLogFilters: { [name: string]: LogLevel } = {};
+  readSinkMinLevels(): { [name: string]: LogLevel } {
+    const sinkMinLevels: { [name: string]: LogLevel } = {};
     for (const sink of this.sinks) {
-      sinkLogFilters[sink.name] = sink.logFilter;
+      sinkMinLevels[sink.name] = sink.minLevel;
     }
-    return sinkLogFilters;
+    return sinkMinLevels;
   }
 
   /**
-   * Set the log level filter of the sink with the given name
+   * Set the minimum log level of the sink with the given name
    * @param sinkName 
-   * @param logLevel 
+   * @param minLevel 
    */
-  setSinkFilter(sinkName: string, logLevel: LogLevel) {
+  setSinkMinLevel(sinkName: string, minLevel: LogLevel) {
     const sink = this.findSinkByName(sinkName);
-    if (sink) sink.logFilter = logLevel;
+    if (sink) sink.minLevel = minLevel;
   }
 
   // ===== Handle Log Messages
@@ -189,14 +188,13 @@ export class LogManager {
   }
 
   /**
-   * Pass a given message to all the log sinks which have filter settings accepting the log message
+   * Pass a given message to all the log sinks which accept the message's log level
    * @param message 
-   * @param sinkFilter 
    */
-  handleLogMessage(message: LogMessage, sinkFilter?: SinkFilter) {
+  handleLogMessage(message: LogMessage) {
 
     for (const sink of this.sinks) {
-      if (this.logLevelSatisfiesFilter(message.level, sinkFilter?.get(sink.name) ?? sink.logFilter)) {
+      if (this.logLevelSatisfiesFilter(message.level, sink.minLevel)) {
         sink.handleMessage(message);
       }
     }
@@ -205,13 +203,12 @@ export class LogManager {
 
   /**
    * Build a complete log message from a partial message, and pass it to all
-   * log sinks which are "interested" in the message
+   * log sinks which accept the message's log level
    * @param partialMsg 
-   * @param sinkFilter 
    * @returns 
    */
-  buildAndHandleLogMessage(partialMsg: Partial<LogMessage>, sinkFilter?: SinkFilter) {
-    return this.handleLogMessage(this.buildLogMessage(partialMsg), sinkFilter);
+  buildAndHandleLogMessage(partialMsg: Partial<LogMessage>) {
+    return this.handleLogMessage(this.buildLogMessage(partialMsg));
   }
 
   /**

@@ -4,11 +4,13 @@
 
 ## Summary
 
-Solid logging library with clean architecture and good core functionality. ✅ **Major improvements completed:** All high-priority issues resolved - incomplete sinks implemented, ConsoleSink bug fixed, and comprehensive error handling added to all sinks.
+Solid logging library with clean architecture and good core functionality. ✅ **All high-priority issues resolved:** Incomplete sinks implemented, ConsoleSink bug fixed, comprehensive error handling added, and API simplified with consistent naming.
 
-**Remaining work:** Medium-priority improvements (naming consistency, file rotation, async support) and increased test coverage.
+**Breaking Changes:** v1.0.0 ready - removed `SinkFilter` class, renamed `logFilter`/`logLevel` to `minLevel` throughout for clarity.
 
-**Test Status:** All 58 tests passing. Core is strong (Logger 96%, LogManager 100%, SinkFilter 96%).
+**Remaining work:** Medium-priority improvements (file rotation, async support) and increased test coverage.
+
+**Test Status:** All 52 tests passing. Core is strong (Logger 96%, LogManager 100%).
 
 ---
 
@@ -41,14 +43,11 @@ Solid logging library with clean architecture and good core functionality. ✅ *
 ### 3. Missing Error Handling ✅ **COMPLETED**
 - Added `onError` callbacks and try-catch blocks to all sinks
 
-### 4. Type/Naming Inconsistency
+### 4. Type/Naming Inconsistency ✅ **COMPLETED**
 
-**Priority: MEDIUM**
-
-- `Logger` uses `logLevel: LogLevel | undefined`
-- `LogSink` interface uses `logFilter: LogLevel`
-- Mixed usage throughout codebase
-- **Action:** Standardize on either "logLevel" or "logFilter"
+- Standardized on `minLevel` throughout (renamed from `logLevel` and `logFilter`)
+- Removed complex `SinkFilter` class entirely
+- Simplified to two clear filtering levels: `Logger.minLevel` and `Sink.minLevel`
 
 ### 5. FileSink Concerns
 
@@ -76,7 +75,7 @@ Solid logging library with clean architecture and good core functionality. ✅ *
 1. ~~**Fix ConsoleSink**~~ ✅ DONE
 2. ~~**Complete/remove incomplete sinks**~~ ✅ DONE
 3. ~~**Add error handling**~~ ✅ DONE
-4. **Standardize terminology** - Pick "logLevel" OR "logFilter" everywhere
+4. ~~**Standardize terminology**~~ ✅ DONE
 
 ### Medium Priority
 

@@ -14,32 +14,32 @@ describe("hypertable sink", () => {
     });
     expect(sink).toBeDefined();
     expect(sink.name).toBe(HypertableSink.name);
-    expect(sink.logFilter).toBeDefined();
+    expect(sink.minLevel).toBeDefined();
   });
 
   it("can have custom name and log filter", () => {
     const name = "Sink";
-    const logFilter = LogLevels.error;
+    const minLevel = LogLevels.error;
     const sink = new HypertableSink({
       apiKey,
       projectId,
       collectionId,
       name,
-      logFilter,
+      minLevel,
     });
     expect(sink.name).toBe(name);
-    expect(sink.logFilter).toBe(logFilter);
+    expect(sink.minLevel).toBe(minLevel);
   });
 
   it("can change log filter", () => {
-    const logFilter = LogLevels.error;
+    const minLevel = LogLevels.error;
     const sink = new HypertableSink({
       apiKey,
       projectId,
       collectionId,
     });
-    sink.logFilter = logFilter;
-    expect(sink.logFilter).toBe(logFilter);
+    sink.minLevel = minLevel;
+    expect(sink.minLevel).toBe(minLevel);
   });
 
   // it("logs handled messages to Hypertable", () => {

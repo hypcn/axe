@@ -18,22 +18,22 @@ describe("console sink", () => {
     expect(sink.name).toBe(name);
   });
 
-  it("has a default log filter", () => {
+  it("has a default min level", () => {
     const sink = new ConsoleSink({ });
-    expect(sink.logFilter).toBeDefined();
+    expect(sink.minLevel).toBeDefined();
   });
 
-  it("can have a custom log filter", () => {
-    const logFilter = LogLevels.error;
-    const sink = new ConsoleSink({ logFilter });
-    expect(sink.logFilter).toBe(logFilter);
+  it("can have a custom min level", () => {
+    const minLevel = LogLevels.error;
+    const sink = new ConsoleSink({ minLevel });
+    expect(sink.minLevel).toBe(minLevel);
   });
 
-  it("can change log filter", () => {
-    const logFilter = LogLevels.error;
+  it("can change min level", () => {
+    const minLevel = LogLevels.error;
     const sink = new ConsoleSink({ });
-    sink.logFilter = logFilter;
-    expect(sink.logFilter).toBe(logFilter);
+    sink.minLevel = minLevel;
+    expect(sink.minLevel).toBe(minLevel);
   });
 
   it("logs handled messages to the console", () => {

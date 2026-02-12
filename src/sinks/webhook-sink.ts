@@ -4,7 +4,7 @@ import { LogLevel, LogLevels, LogMessage, LogSink } from "../interfaces";
 export class WebhookSink implements LogSink {
 
   name: string = this.constructor.name;
-  logFilter: LogLevel = LogLevels.warn;
+  minLevel: LogLevel = LogLevels.warn;
 
   private url: string;
   private method: string;
@@ -14,7 +14,7 @@ export class WebhookSink implements LogSink {
 
   constructor(settings: {
     name?: string,
-    logFilter?: LogLevel,
+    minLevel?: LogLevel,
 
     /** The URL to which to send the request */
     url: string,
@@ -31,7 +31,7 @@ export class WebhookSink implements LogSink {
     onError?: (error: Error) => void,
   }) {
     if (settings.name) this.name = settings.name;
-    if (settings.logFilter) this.logFilter = settings.logFilter;
+    if (settings.minLevel) this.minLevel = settings.minLevel;
 
     this.url = settings.url;
     this.method = settings.method ?? "POST";

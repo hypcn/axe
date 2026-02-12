@@ -48,11 +48,11 @@ logger.log("log primitives and objects", [1, 2, 3], { an: "object" }, undefined)
 const anotherLogger = new Logger("Another Logger");
 anotherLogger.log("This logger has the context 'Another Logger'");
 
-// Update the log level filter for the default console sink.
+// Update the minimum log level for the default console sink.
 // Sinks are identified by their unique "name", the default console sink's name is exported
 // from the package.
-logMgr.setSinkFilter(CONSOLE_SINK, LogLevels.verbose);
-logMgr.setSinkFilter("Console", "verbose"); // <- this is equivalent, but less robust to change
+logMgr.setSinkMinLevel(CONSOLE_SINK, LogLevels.verbose);
+logMgr.setSinkMinLevel("Console", "verbose"); // <- this is equivalent, but less robust to change
 logger.verbose("verbose logs are ignored by default, but this is displayed.");
 
 // Additional sinks can be added.
@@ -60,17 +60,17 @@ logger.verbose("verbose logs are ignored by default, but this is displayed.");
 const newConsoleSink = "Console2";
 logMgr.addSink(new ConsoleSink({
   name: newConsoleSink,
-  logLevel: LogLevels.log,
+  minLevel: LogLevels.log,
 }));
 
-// Separate sinks can have different log filters:
-logMgr.setSinkFilter(newConsoleSink, LogLevels.warn);
-// The current sink  log level filters can be read:
-logMgr.readSinkFilters(); // { 'Console': 'verbose', 'Console2': 'warn' }
+// Separate sinks can have different minimum levels:
+logMgr.setSinkMinLevel(newConsoleSink, LogLevels.warn);
+// The current sink minimum levels can be read:
+logMgr.readSinkMinLevels(); // { 'Console': 'verbose', 'Console2': 'warn' }
 // This is useful for editing which log levels are logged where at runtime
 
 // Separate manager instances can be created,
-// with their own separate sink instances and log level filters
+// with their own separate sink instances and log level settings
 const newManager = new LogManager({ withDefaultConsoleSink: true });
 const logger2 = newManager.newLogger("Logger 2");
 logger2.log("This logger's manager 'newManager' is separate from 'logMgr' above.");
@@ -120,18 +120,9 @@ logger.log(...msgs: any[]);
 logger.debug(...msgs: any[]);
 logger.verbose(...msgs: any[]);
 
-// Logger instances can be configured to override the logFilter settings of `LogSink`s in their manager
-
-// Read all of the logger's filter settings (may be empty)
-logger.sinkFilter.read(): { [sinkName: string]: LogLevel };
-// Get the logger's filter set on the named sink (may be undefined)
-logger.sinkFilter.get(sinkName: string): LogLevel | undefined;
-// Set a log filter on the named sink
-logger.sinkFilter.set(sinkName: string, logLevel: LogLevel): void;
-// Remove the log filter set on the named sink
-logger.sinkFilter.remove(sinkName: string): void;
-// Remove all log filters set on the logger
-logger.sinkFilter.clear(): void;
+// Set the minimum log level for this logger
+// Only messages at or above this level will be emitted
+logger.minLevel = LogLevels.warn; // Only warn and error will be logged
 ```
 
 ## LogManager
@@ -168,8 +159,8 @@ logMgr.removeSinkByName(name: string): void;
 logMgr.removeSink(sink: LogSink): void;
 logMgr.removeAllSinks(): void;
 
-logMgr.readSinkFilters(): { [name: string]: LogLevel };
-logMgr.setSinkFilter(sinkName: string, logLevel: LogLevel): void;
+logMgr.readSinkMinLevels(): { [name: string]: LogLevel };
+logMgr.setSinkMinLevel(sinkName: string, minLevel: LogLevel): void;
 ```
 
 ## LogSink
@@ -189,12 +180,10 @@ interface LogSink {
    */
   name: string,
   /**
-   * The default minimum log level that a received message must have for it to be handled.
+   * The minimum log level that a received message must have for it to be handled.
    * If the log level of a received message is lower than this, the message is ignored.
-   * 
-   * This can be overridden by individual logger instances.
    */
-  logFilter: LogLevel,
+  minLevel: LogLevel,
   /**
    * Handle a logged message. The message does not need to be filtered again.
    * @param logMessage 
@@ -211,7 +200,7 @@ interface LogSink {
 
 class MySink implements LogSink {
   name: "MySink",
-  logLevel: LogLevels.log,
+  minLevel: LogLevels.log,
 
   constructor(settings: { /* ... */ }) {
     // ...
@@ -246,7 +235,7 @@ import { Logger, logMgr, LogLevels, ConsoleSink } from "@hypericon/axe";
 logMgr.removeAllSinks();
 logMgr.addSink(new ConsoleSink({
   name: "ConsoleSink",
-  logLevel: LogLevels.log,
+  minLevel: LogLevels.log,
 }));
 
 const logger = new Logger("Example");
@@ -265,7 +254,7 @@ import { Logger, logMgr, LogLevels, FileSink } from "@hypericon/axe";
 logMgr.removeAllSinks();
 const sink = new FileSink({
   name: "FileSink",
-  logLevel: LogLevels.log,
+  minLevel: LogLevels.log,
 
   /**
    * Full path to the dir containing the log files
@@ -320,7 +309,7 @@ import { Logger, logMgr, LogLevels, HypertableSink } from "@hypericon/axe";
 logMgr.removeAllSinks();
 logMgr.addSink(new HypertableSink({
   name: "HypertableSink",
-  logLevel: LogLevels.log,
+  minLevel: LogLevels.log,
 
   /** Hypertable API key with permission to create a Record */
   apiKey: string,
@@ -352,7 +341,7 @@ import { Logger, logMgr, LogLevels, ObservableSink } from "@hypericon/axe";
 logMgr.removeAllSinks();
 const sink = new ObservableSink({
   name: "ObservableSink",
-  logLevel: LogLevels.log,
+  minLevel: LogLevels.log,
 });
 logMgr.addSink(sink);
 
@@ -377,7 +366,7 @@ import { Logger, logMgr, LogLevels, WebhookSink } from "@hypericon/axe";
 logMgr.removeAllSinks();
 logMgr.addSink(new WebhookSink({
   name: "WebhookSink",
-  logLevel: LogLevels.warn,
+  minLevel: LogLevels.warn,
 
   /** The URL to which to send the request */
   url: "https://some.url/api/123-456-789",

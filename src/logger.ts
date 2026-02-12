@@ -1,7 +1,6 @@
 import { inspect } from "util";
 import { LogManager, logMgr } from "./log-manager";
 import { LogLevel, SimpleLogger } from "./interfaces";
-import { SinkFilter } from "./sink-filter";
 
 export class Logger implements SimpleLogger {
 
@@ -19,18 +18,11 @@ export class Logger implements SimpleLogger {
   context: string | undefined;
 
   /**
-   * Filter messages based on level before they reach any log sinks
-   * @default undefined
+   * The minimum log level that this logger will emit.
+   * Messages below this level are filtered out before reaching any sinks.
+   * @default undefined (no filtering at logger level)
    */
-  logLevel: LogLevel | undefined;
-
-  /**
-   * Override the log filter levels defined in sinks for this logger instance.
-   * 
-   * Map of sink names to minimum LogLevels required to use the sink.
-   * If a filter level is not defined for a sink, the common sink filter level is used.
-   */
-  sinkFilter = new SinkFilter();
+  minLevel: LogLevel | undefined;
 
   constructor(context?: string) {
     this.context = context;
@@ -44,7 +36,7 @@ export class Logger implements SimpleLogger {
       level: "error",
       context: this.context,
       message: this.buildMessageString(...msgs),
-    }, this.sinkFilter);
+    });
   }
 
   warn(...msgs: any[]) {
@@ -55,7 +47,7 @@ export class Logger implements SimpleLogger {
       level: "warn",
       context: this.context,
       message: this.buildMessageString(...msgs),
-    }, this.sinkFilter);
+    });
   }
 
   log(...msgs: any[]) {
@@ -66,7 +58,7 @@ export class Logger implements SimpleLogger {
       level: "log",
       context: this.context,
       message: this.buildMessageString(...msgs),
-    }, this.sinkFilter);
+    });
   }
 
   debug(...msgs: any[]) {
@@ -77,7 +69,7 @@ export class Logger implements SimpleLogger {
       level: "debug",
       context: this.context,
       message: this.buildMessageString(...msgs),
-    }, this.sinkFilter);
+    });
   }
 
   verbose(...msgs: any[]) {
@@ -88,15 +80,15 @@ export class Logger implements SimpleLogger {
       level: "verbose",
       context: this.context,
       message: this.buildMessageString(...msgs),
-    }, this.sinkFilter);
+    });
   }
 
   protected levelSatisfiesLocalFilter(level: LogLevel): boolean {
 
     // If no filter, don't filter messages
-    if (!this.logLevel) return true;
+    if (!this.minLevel) return true;
 
-    return this._manager?.logLevelSatisfiesFilter(level, this.logLevel) ?? false;
+    return this._manager?.logLevelSatisfiesFilter(level, this.minLevel) ?? false;
   }
 
   protected buildMessageString(...msgs: any[]): string {

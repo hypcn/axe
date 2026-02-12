@@ -18,7 +18,7 @@ describe("logger", () => {
       const manager = new LogManager();
       manager.addSink({
         name: "sink",
-        logFilter: LogLevels.log,
+        minLevel: LogLevels.log,
         destroy: () => { },
         handleMessage: (msg) => {
           expect(msg.level).toBe(LogLevels.error);
@@ -39,7 +39,7 @@ describe("logger", () => {
       const manager = new LogManager();
       manager.addSink({
         name: "sink",
-        logFilter: LogLevels.log,
+        minLevel: LogLevels.log,
         destroy: () => { },
         handleMessage: (msg) => {
           expect(msg.level).toBe(LogLevels.warn);
@@ -60,7 +60,7 @@ describe("logger", () => {
       const manager = new LogManager();
       manager.addSink({
         name: "sink",
-        logFilter: LogLevels.error,
+        minLevel: LogLevels.error,
         destroy: () => { },
         handleMessage: (msg) => {
           expect(msg.level).toBe(LogLevels.error);
@@ -82,7 +82,7 @@ describe("logger", () => {
       const manager = new LogManager();
       manager.addSink({
         name: "sink",
-        logFilter: LogLevels.log,
+        minLevel: LogLevels.log,
         destroy: () => { },
         handleMessage: (msg) => {
           expect(msg.level).toBe(LogLevels.log);
@@ -103,7 +103,7 @@ describe("logger", () => {
       const manager = new LogManager();
       manager.addSink({
         name: "sink",
-        logFilter: LogLevels.error,
+        minLevel: LogLevels.error,
         destroy: () => { },
         handleMessage: (msg) => {
           expect(msg.level).toBe(LogLevels.error);
@@ -125,7 +125,7 @@ describe("logger", () => {
       const manager = new LogManager();
       manager.addSink({
         name: "sink",
-        logFilter: LogLevels.debug,
+        minLevel: LogLevels.debug,
         destroy: () => { },
         handleMessage: (msg) => {
           expect(msg.level).toBe(LogLevels.debug);
@@ -146,7 +146,7 @@ describe("logger", () => {
       const manager = new LogManager();
       manager.addSink({
         name: "sink",
-        logFilter: LogLevels.error,
+        minLevel: LogLevels.error,
         destroy: () => { },
         handleMessage: (msg) => {
           expect(msg.level).toBe(LogLevels.error);
@@ -168,7 +168,7 @@ describe("logger", () => {
       const manager = new LogManager();
       manager.addSink({
         name: "sink",
-        logFilter: LogLevels.verbose,
+        minLevel: LogLevels.verbose,
         destroy: () => { },
         handleMessage: (msg) => {
           expect(msg.level).toBe(LogLevels.verbose);
@@ -189,7 +189,7 @@ describe("logger", () => {
       const manager = new LogManager();
       manager.addSink({
         name: "sink",
-        logFilter: LogLevels.error,
+        minLevel: LogLevels.error,
         destroy: () => { },
         handleMessage: (msg) => {
           expect(msg.level).toBe(LogLevels.error);
@@ -211,7 +211,7 @@ describe("logger", () => {
       const manager = new LogManager();
       manager.addSink({
         name: "sink",
-        logFilter: LogLevels.log,
+        minLevel: LogLevels.log,
         destroy: () => { },
         handleMessage: (msg) => {
           expect(msg.message).toBe(`string { an: 'object' } [ 1, 2, 3 ]`);
@@ -229,48 +229,22 @@ describe("logger", () => {
     });
   });
 
-  it("can override sink log filters", () => {
-    return new Promise<void>((resolve, reject) => {
-
-      const manager = new LogManager();
-      const sinkName = "sink";
-
-      manager.addSink({
-        name: sinkName,
-        logFilter: LogLevels.error,
-        destroy: () => { },
-        handleMessage: (msg) => {
-          expect(msg.level).toBe(LogLevels.warn);
-          expect(msg.message).toBe("warn");
-          resolve();
-        },
-      });
-
-      const logger = manager.createLogger();
-      logger.sinkFilter.set(sinkName, LogLevels.warn);
-
-      logger.log("log");
-      logger.warn("warn");
-
-    });
-  });
-
-  it("does not have a default log level", () => {
+  it("does not have a default min level", () => {
 
     const manager = new LogManager();
     const logger = manager.createLogger();
 
-    expect(logger.logLevel).toBeUndefined();
+    expect(logger.minLevel).toBeUndefined();
 
   });
 
-  it("applies the configured log level", () => {
+  it("applies the configured min level", () => {
     return new Promise<void>((resolve, reject) => {
 
       const manager = new LogManager();
       manager.addSink({
         name: "sink",
-        logFilter: LogLevels.verbose, // no sink filtering
+        minLevel: LogLevels.verbose, // no sink filtering
         destroy: () => { },
         handleMessage: (msg) => {
           expect(msg.level).toBe(LogLevels.log);
@@ -280,7 +254,7 @@ describe("logger", () => {
       })
 
       const logger = manager.createLogger();
-      logger.logLevel = LogLevels.log; // Logger filtering
+      logger.minLevel = LogLevels.log; // Logger min level filtering
       logger.verbose("verbose");
       logger.log("log");
 

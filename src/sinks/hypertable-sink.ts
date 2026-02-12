@@ -16,7 +16,7 @@ export class HypertableSink implements LogSink {
   // private logger: Logger
 
   name: string = this.constructor.name;
-  logFilter: LogLevel = LogLevels.warn;
+  minLevel: LogLevel = LogLevels.warn;
 
   baseUrl = "https://hypertable.cloud";
   apiKey: string;
@@ -37,7 +37,7 @@ export class HypertableSink implements LogSink {
 
   constructor(settings: {
     name?: string,
-    logFilter?: LogLevel,
+    minLevel?: LogLevel,
 
     /** Hypertable API key with permission to create a Record */
     apiKey: string,
@@ -54,7 +54,7 @@ export class HypertableSink implements LogSink {
   }) {
 
     if (settings.name) this.name = settings.name;
-    if (settings.logFilter) this.logFilter = settings.logFilter;
+    if (settings.minLevel) this.minLevel = settings.minLevel;
 
     this.apiKey = settings.apiKey;
     this.projectId = settings.projectId;

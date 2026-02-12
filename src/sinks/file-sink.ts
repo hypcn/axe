@@ -26,7 +26,7 @@ export interface LogFileInfo {
 export class FileSink implements LogSink {
 
   name: string = this.constructor.name;
-  logFilter: LogLevel = LogLevels.log;
+  minLevel: LogLevel = LogLevels.log;
 
   private logDirPath = DEFAULT_LOG_PATH;
   private logFilenameFn: (() => string) = () => {
@@ -43,7 +43,7 @@ export class FileSink implements LogSink {
 
   constructor(settings: {
     name?: string,
-    logFilter?: LogLevel,
+    minLevel?: LogLevel,
 
     /**
      * Full path to the dir containing the log files
@@ -75,7 +75,7 @@ export class FileSink implements LogSink {
     onError?: (error: Error) => void,
   }) {
     if (settings.name) this.name = settings.name;
-    if (settings.logFilter) this.logFilter = settings.logFilter;
+    if (settings.minLevel) this.minLevel = settings.minLevel;
 
     if (settings.logDirPath) this.logDirPath = settings.logDirPath;
     if (settings.logFilenameFn) this.logFilenameFn = settings.logFilenameFn;
