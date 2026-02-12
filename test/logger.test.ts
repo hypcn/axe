@@ -261,4 +261,241 @@ describe("logger", () => {
     });
   });
 
+  // Edge case tests
+  it("handles null values", () => {
+    return new Promise<void>((resolve, reject) => {
+
+      const manager = new LogManager();
+      manager.addSink({
+        name: "sink",
+        minLevel: LogLevels.log,
+        destroy: () => { },
+        handleMessage: (msg) => {
+          expect(msg.message).toBe("null");
+          resolve();
+        },
+      });
+
+      const logger = manager.createLogger();
+      logger.log(null);
+
+    });
+  });
+
+  it("handles undefined values", () => {
+    return new Promise<void>((resolve, reject) => {
+
+      const manager = new LogManager();
+      manager.addSink({
+        name: "sink",
+        minLevel: LogLevels.log,
+        destroy: () => { },
+        handleMessage: (msg) => {
+          expect(msg.message).toBe("undefined");
+          resolve();
+        },
+      });
+
+      const logger = manager.createLogger();
+      logger.log(undefined);
+
+    });
+  });
+
+  it("handles Error objects", () => {
+    return new Promise<void>((resolve, reject) => {
+
+      const manager = new LogManager();
+      manager.addSink({
+        name: "sink",
+        minLevel: LogLevels.log,
+        destroy: () => { },
+        handleMessage: (msg) => {
+          expect(msg.message).toContain("Error: Test error");
+          resolve();
+        },
+      });
+
+      const logger = manager.createLogger();
+      logger.log(new Error("Test error"));
+
+    });
+  });
+
+  it("handles nested objects", () => {
+    return new Promise<void>((resolve, reject) => {
+
+      const manager = new LogManager();
+      manager.addSink({
+        name: "sink",
+        minLevel: LogLevels.log,
+        destroy: () => { },
+        handleMessage: (msg) => {
+          expect(msg.message).toContain("level1");
+          expect(msg.message).toContain("level2");
+          expect(msg.message).toContain("deep");
+          resolve();
+        },
+      });
+
+      const logger = manager.createLogger();
+      logger.log({
+        level1: {
+          level2: {
+            deep: "value"
+          }
+        }
+      });
+
+    });
+  });
+
+  it("handles arrays with mixed types", () => {
+    return new Promise<void>((resolve, reject) => {
+
+      const manager = new LogManager();
+      manager.addSink({
+        name: "sink",
+        minLevel: LogLevels.log,
+        destroy: () => { },
+        handleMessage: (msg) => {
+          expect(msg.message).toContain("1");
+          expect(msg.message).toContain("string");
+          expect(msg.message).toContain("true");
+          expect(msg.message).toContain("null");
+          resolve();
+        },
+      });
+
+      const logger = manager.createLogger();
+      logger.log([1, "string", true, null, undefined]);
+
+    });
+  });
+
+  it("handles circular references", () => {
+    return new Promise<void>((resolve, reject) => {
+
+      const manager = new LogManager();
+      manager.addSink({
+        name: "sink",
+        minLevel: LogLevels.log,
+        destroy: () => { },
+        handleMessage: (msg) => {
+          // Should not crash, message should contain something
+          expect(msg.message).toBeDefined();
+          expect(msg.message.length).toBeGreaterThan(0);
+          resolve();
+        },
+      });
+
+      const logger = manager.createLogger();
+      const obj: any = { a: 1 };
+      obj.self = obj;
+      logger.log(obj);
+
+    });
+  });
+
+  it("handles empty string", () => {
+    return new Promise<void>((resolve, reject) => {
+
+      const manager = new LogManager();
+      manager.addSink({
+        name: "sink",
+        minLevel: LogLevels.log,
+        destroy: () => { },
+        handleMessage: (msg) => {
+          expect(msg.message).toBe("");
+          resolve();
+        },
+      });
+
+      const logger = manager.createLogger();
+      logger.log("");
+
+    });
+  });
+
+  it("handles no arguments", () => {
+    return new Promise<void>((resolve, reject) => {
+
+      const manager = new LogManager();
+      manager.addSink({
+        name: "sink",
+        minLevel: LogLevels.log,
+        destroy: () => { },
+        handleMessage: (msg) => {
+          expect(msg.message).toBe("");
+          resolve();
+        },
+      });
+
+      const logger = manager.createLogger();
+      logger.log();
+
+    });
+  });
+
+  it("handles boolean values", () => {
+    return new Promise<void>((resolve, reject) => {
+
+      const manager = new LogManager();
+      manager.addSink({
+        name: "sink",
+        minLevel: LogLevels.log,
+        destroy: () => { },
+        handleMessage: (msg) => {
+          expect(msg.message).toBe("true false");
+          resolve();
+        },
+      });
+
+      const logger = manager.createLogger();
+      logger.log(true, false);
+
+    });
+  });
+
+  it("handles numbers", () => {
+    return new Promise<void>((resolve, reject) => {
+
+      const manager = new LogManager();
+      manager.addSink({
+        name: "sink",
+        minLevel: LogLevels.log,
+        destroy: () => { },
+        handleMessage: (msg) => {
+          expect(msg.message).toBe("0 -1 3.14 Infinity -Infinity NaN");
+          resolve();
+        },
+      });
+
+      const logger = manager.createLogger();
+      logger.log(0, -1, 3.14, Infinity, -Infinity, NaN);
+
+    });
+  });
+
+  it("handles very long strings", () => {
+    return new Promise<void>((resolve, reject) => {
+
+      const manager = new LogManager();
+      manager.addSink({
+        name: "sink",
+        minLevel: LogLevels.log,
+        destroy: () => { },
+        handleMessage: (msg) => {
+          expect(msg.message.length).toBe(10000);
+          resolve();
+        },
+      });
+
+      const logger = manager.createLogger();
+      logger.log("a".repeat(10000));
+
+    });
+  });
+
 });
+
