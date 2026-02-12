@@ -39,6 +39,7 @@ export class FileSink implements LogSink {
   private logStream: WriteStream | undefined;
   private streamReady = false;
   private lineBuffer: string[] = [];
+  private onError?: (error: Error) => void;
 
   constructor(settings: {
     name?: string,
@@ -70,12 +71,15 @@ export class FileSink implements LogSink {
      * then be opened manually.
      */
     noOpenOnCreate?: boolean,
+    /** Optional error handler for file system errors */
+    onError?: (error: Error) => void,
   }) {
     if (settings.name) this.name = settings.name;
     if (settings.logFilter) this.logFilter = settings.logFilter;
 
     if (settings.logDirPath) this.logDirPath = settings.logDirPath;
     if (settings.logFilenameFn) this.logFilenameFn = settings.logFilenameFn;
+    this.onError = settings.onError;
 
     if (settings.noOpenOnCreate !== false) {
       this.openNewFile();
@@ -83,16 +87,18 @@ export class FileSink implements LogSink {
   }
 
   handleMessage(logMessage: LogMessage) {
-    
-    const line = [
-      logMessage.timestamp.toISOString(),
-      LogLevelNameLeft[logMessage.level],
-      `[${logMessage.context}]`,
-      logMessage.message,
-    ].join("  ");
+    try {
+      const line = [
+        logMessage.timestamp.toISOString(),
+        LogLevelNameLeft[logMessage.level],
+        `[${logMessage.context}]`,
+        logMessage.message,
+      ].join("  ");
 
-    this.writeLine(line);
-
+      this.writeLine(line);
+    } catch (error) {
+      this.handleError(error instanceof Error ? error : new Error(String(error)));
+    }
   }
 
   destroy() {
@@ -114,40 +120,55 @@ export class FileSink implements LogSink {
   }
 
   async listLogFiles(): Promise<{ logFiles: LogFileInfo[] }> {
+    try {
+      const logDirContents = await readdir(this.logDirPath);
 
-    const logDirContents = await readdir(this.logDirPath);
+      const fileInfo: LogFileInfo[] = [];
+      for await (const file of logDirContents) {
+        const stats = await stat(join(this.logDirPath, file));
+        fileInfo.push({
+          filename: file,
+          size: stats.size,
+          created: stats.birthtimeMs,
+          modified: stats.mtimeMs,
+        });
+      }
 
-    const fileInfo: LogFileInfo[] = [];
-    for await (const file of logDirContents) {
-      const stats = await stat(join(this.logDirPath, file));
-      fileInfo.push({
-        filename: file,
-        size: stats.size,
-        created: stats.birthtimeMs,
-        modified: stats.mtimeMs,
-      });
+      return {
+        logFiles: fileInfo,
+      };
+    } catch (error) {
+      this.handleError(error instanceof Error ? error : new Error(String(error)));
+      return { logFiles: [] };
     }
-
-    return {
-      logFiles: fileInfo,
-    };
   }
 
   async readLogFile(filename: string): Promise<{ filename: string, contents: string }> {
+    try {
+      const readPath = join(this.logDirPath, filename);
 
-    const readPath = join(this.logDirPath, filename);
+      const contents = await readFile(readPath, { encoding: "utf8" });
 
-    const contents = await readFile(readPath, { encoding: "utf8" });
-
-    return {
-      filename,
-      contents,
-    };
+      return {
+        filename,
+        contents,
+      };
+    } catch (error) {
+      this.handleError(error instanceof Error ? error : new Error(String(error)));
+      return {
+        filename,
+        contents: "",
+      };
+    }
   }
 
   private ensureLogDir() {
-    if (!existsSync(this.logDirPath)) {
-      mkdirSync(this.logDirPath, { recursive: true });
+    try {
+      if (!existsSync(this.logDirPath)) {
+        mkdirSync(this.logDirPath, { recursive: true });
+      }
+    } catch (error) {
+      this.handleError(error instanceof Error ? error : new Error(String(error)));
     }
   }
 
@@ -176,6 +197,7 @@ export class FileSink implements LogSink {
     this.logStream.on("error", (err) => {
       // CONSOLE && console.log(`log stream event: ERROR`);
       this.streamReady = false;
+      this.handleError(err);
     });
     this.logStream.on("ready", () => {
       // CONSOLE && console.log(`log stream event: READY`);
@@ -191,31 +213,42 @@ export class FileSink implements LogSink {
   }
 
   private writeLine(line: string) {
-    line = line.endsWith("\n") ? line : line + "\n";
+    try {
+      line = line.endsWith("\n") ? line : line + "\n";
 
-    // It the stream is not ready, buffer the line
-    if (!this.logStream || !this.streamReady) {
+      // It the stream is not ready, buffer the line
+      if (!this.logStream || !this.streamReady) {
 
-      DEBUG && console.log(`Buffering line: ${line}`);
-      this.lineBuffer.push(line);
+        DEBUG && console.log(`Buffering line: ${line}`);
+        this.lineBuffer.push(line);
 
-      // If a stream has not been opened, open it
-      if (!this.logStream) {
-        this.openLogStream();
+        // If a stream has not been opened, open it
+        if (!this.logStream) {
+          this.openLogStream();
+        }
+
+        return;
       }
 
-      return;
+      while (this.lineBuffer.length > 0) {
+        const buffered = this.lineBuffer.splice(0, 1)[0];
+        DEBUG && console.log(`Writing buffered line: ${buffered}`);
+        this.logStream.write(buffered);
+      }
+
+      DEBUG && console.log(`Writing line: ${line}`);
+      this.logStream.write(line);
+    } catch (error) {
+      this.handleError(error instanceof Error ? error : new Error(String(error)));
     }
+  }
 
-    while (this.lineBuffer.length > 0) {
-      const buffered = this.lineBuffer.splice(0, 1)[0];
-      DEBUG && console.log(`Writing buffered line: ${buffered}`);
-      this.logStream.write(buffered);
+  private handleError(error: Error) {
+    if (this.onError) {
+      this.onError(error);
+    } else {
+      console.error(`FileSink error for ${this.name}:`, error.message);
     }
-
-    DEBUG && console.log(`Writing line: ${line}`);
-    this.logStream.write(line);
-
   }
 
 }

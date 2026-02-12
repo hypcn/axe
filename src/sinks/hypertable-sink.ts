@@ -33,6 +33,8 @@ export class HypertableSink implements LogSink {
     processId: "processId",
   };
 
+  private onError?: (error: Error) => void;
+
   constructor(settings: {
     name?: string,
     logFilter?: LogLevel,
@@ -47,6 +49,8 @@ export class HypertableSink implements LogSink {
     baseUrl?: string,
     /** Optionally override the field keys within the created Record */
     fieldKeys?: Partial<RecordFieldKeys>,
+    /** Optional error handler for failed requests */
+    onError?: (error: Error) => void,
   }) {
 
     if (settings.name) this.name = settings.name;
@@ -56,6 +60,7 @@ export class HypertableSink implements LogSink {
     this.projectId = settings.projectId;
     this.collectionId = settings.collectionId;
     if (settings.baseUrl) this.baseUrl = settings.baseUrl;
+    this.onError = settings.onError;
 
     if (settings.fieldKeys) {
       if (settings.fieldKeys.timestamp) this.fieldKeys.timestamp = settings.fieldKeys.timestamp;
@@ -87,18 +92,21 @@ export class HypertableSink implements LogSink {
 
     // console.log(`Upload body:`, body);
 
-    await fetch(url, {
+    // Send request asynchronously without blocking
+    fetch(url, {
       method: "POST",
       headers: {
         "Authorization": `Basic ${this.apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(body),
-    }).then(res => {
-      return res;
     }).catch(error => {
-      // this.logger.error(`Error uploading cloud log:`, error); // TODO
-      console.error(`Error uploading cloud log:`, error);
+      const err = error instanceof Error ? error : new Error(String(error));
+      if (this.onError) {
+        this.onError(err);
+      } else {
+        console.error(`HypertableSink error for ${this.name}:`, err.message);
+      }
     });
 
   }

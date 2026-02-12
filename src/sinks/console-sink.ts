@@ -24,6 +24,8 @@ export class ConsoleSink implements LogSink {
   noLevel?: boolean;
   noContext?: boolean;
 
+  private onError?: (error: Error) => void;
+
   constructor(settings: {
     name?: string,
     logFilter?: LogLevel,
@@ -32,6 +34,8 @@ export class ConsoleSink implements LogSink {
     noTimestamp?: boolean,
     noLevel?: boolean,
     noContext?: boolean,
+    /** Optional error handler */
+    onError?: (error: Error) => void,
   }) {
     if (settings.name) this.name = settings.name;
     if (settings.logFilter) this.logFilter = settings.logFilter;
@@ -40,17 +44,44 @@ export class ConsoleSink implements LogSink {
     this.noTimestamp = settings.noTimestamp;
     this.noContext = settings.noContext;
     this.noLevel = settings.noLevel;
+    this.onError = settings.onError;
   }
   
   handleMessage(logMessage: LogMessage) {
+    try {
+      const parts: string[] = [];
 
-    console.log([
-      `[${logMessage.timestamp.toISOString()}]`,
-      LOG_LEVEL_COLOUR_FNS[logMessage.level](LogLevelNameLeft[logMessage.level]),
-      CONTEXT_COLOUR_FN(`[${logMessage.context}]`),
-      LOG_LEVEL_COLOUR_FNS[logMessage.level](logMessage.message),
-    ].join("  "));
+      // Add timestamp if not disabled
+      if (!this.noTimestamp) {
+        parts.push(`[${logMessage.timestamp.toISOString()}]`);
+      }
 
+      // Add log level if not disabled
+      if (!this.noLevel) {
+        const levelText = LogLevelNameLeft[logMessage.level];
+        parts.push(this.noColour ? levelText : LOG_LEVEL_COLOUR_FNS[logMessage.level](levelText));
+      }
+
+      // Add context if not disabled
+      if (!this.noContext) {
+        const contextText = `[${logMessage.context}]`;
+        parts.push(this.noColour ? contextText : CONTEXT_COLOUR_FN(contextText));
+      }
+
+      // Add message (always included)
+      const messageText = logMessage.message;
+      parts.push(this.noColour ? messageText : LOG_LEVEL_COLOUR_FNS[logMessage.level](messageText));
+
+      console.log(parts.join("  "));
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      if (this.onError) {
+        this.onError(err);
+      } else {
+        // Last resort - use console.error directly
+        console.error(`ConsoleSink error for ${this.name}:`, err.message);
+      }
+    }
   }
 
   destroy() {

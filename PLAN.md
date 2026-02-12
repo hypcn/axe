@@ -32,28 +32,34 @@ Solid logging library with clean architecture and good core functionality. Main 
 
 ### 1. Incomplete Implementations
 
-**Priority: HIGH**
+**Priority: HIGH** ✅ **COMPLETED**
 
-- `src/sinks/webhook-sink.ts` - `handleMessage()` throws "Method not implemented."
-- `src/sinks/websocket-sink.ts` - Stub implementation (22% coverage)
-- **Action:** Either fully implement, mark as experimental in docs, or remove from package
+- ~~`src/sinks/webhook-sink.ts` - `handleMessage()` throws "Method not implemented."~~
+- ~~`src/sinks/websocket-sink.ts` - Stub implementation (22% coverage)~~
+- **Completed:** Both sinks fully implemented with proper error handling and configuration options
+  - WebhookSink: Sends logs to HTTP endpoints with customizable method, headers, and body builder
+  - WebsocketSink: Real-time log streaming with reconnection logic, message queueing, and cross-platform support (browser/Node.js)
 
 ### 2. ConsoleSink Bug
 
-**Priority: HIGH**
+**Priority: HIGH** ✅ **COMPLETED**
 
-- Constructor accepts `noColour`, `noTimestamp`, `noLevel`, `noContext` settings
-- These settings are **never used** in `handleMessage()` - always outputs everything with colors
-- **Action:** Implement the settings or remove them from constructor
+- ~~Constructor accepts `noColour`, `noTimestamp`, `noLevel`, `noContext` settings~~
+- ~~These settings are **never used** in `handleMessage()` - always outputs everything with colors~~
+- **Completed:** All constructor settings now properly implemented and respected in handleMessage()
 
 ### 3. Missing Error Handling
 
-**Priority: HIGH**
+**Priority: HIGH** ✅ **COMPLETED**
 
-- No try-catch blocks in sink implementations
-- File write failures, network errors could crash the app
-- Logs could be silently dropped on errors
-- **Action:** Add error handling + error callback/event system
+- ~~No try-catch blocks in sink implementations~~
+- ~~File write failures, network errors could crash the app~~
+- ~~Logs could be silently dropped on errors~~
+- **Completed:** Added comprehensive error handling to all sinks:
+  - Optional `onError` callback parameter in all sink constructors
+  - Try-catch blocks wrapping critical operations
+  - Graceful fallback behavior (console.error) when onError not provided
+  - File system errors, network errors, and stream errors properly handled
 
 ### 4. Type/Naming Inconsistency
 
